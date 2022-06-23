@@ -1,0 +1,367 @@
+import datetime
+import os
+from urllib.parse import urlparse, urljoin
+
+from corsheaders.defaults import default_headers
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_THIS_TO_SOMETHING_SECRET_IN_PRODUCTION")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = ['198.211.99.20', 'localhost', '127.0.0.1','0.0.0.0','10.1.15.34', '172.20.0.1']
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "WebSocketId",
+]
+# CORS_ORIGIN_WHITELIST = ['198.211.99.20', 'localhost', '127.0.0.1','0.0.0.0','10.1.15.34']
+
+
+INSTALLED_APPS = [
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "corsheaders",
+    "channels",
+    "drf_spectacular",
+    "core",
+    "api",
+    "ws",
+    "apps.blog_it",
+    "apps.contact",
+    "apps.forum",
+    "apps.comment",
+    "apps.user",
+
+]
+
+ADDITIONAL_APPS = os.getenv("ADDITIONAL_APPS", None)
+if ADDITIONAL_APPS is not None:
+    INSTALLED_APPS += ADDITIONAL_APPS.split(",")
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "config.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": ['core/templates'],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+REDIS_USERNAME = os.getenv("REDIS_USER", "")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+REDIS_PROTOCOL = os.getenv("REDIS_PROTOCOL", "redis")
+REDIS_URL = os.getenv(
+    "REDIS_URL",
+    f"{REDIS_PROTOCOL}://{REDIS_USERNAME}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0",
+)
+
+CELERY_BROKER_URL = REDIS_URL
+CELERY_TASK_ROUTES = {
+}
+CELERY_SOFT_TIME_LIMIT = 60 * 5
+CELERY_TIME_LIMIT = CELERY_SOFT_TIME_LIMIT + 60
+
+CELERY_REDBEAT_REDIS_URL = REDIS_URL
+# Explicitly set the same value as the default loop interval here so we can use it
+# later. CELERY_BEAT_MAX_LOOP_INTERVAL < CELERY_REDBEAT_LOCK_TIMEOUT must be kept true
+# as otherwise a beat instance will acquire the lock, do scheduling, go to sleep for
+# CELERY_BEAT_MAX_LOOP_INTERVAL before waking up where it assumes it still owns the lock
+# however if the lock timeout is less than the interval the lock will have been released
+# and the beat instance will crash as it attempts to extend the lock which it no longer
+# owns.
+CELERY_BEAT_MAX_LOOP_INTERVAL = os.getenv("CELERY_BEAT_MAX_LOOP_INTERVAL", 20)
+# By default CELERY_REDBEAT_LOCK_TIMEOUT = 5 * CELERY_BEAT_MAX_LOOP_INTERVAL
+# Only one beat instance can hold this lock and schedule tasks at any one time.
+# This means if one celery-beat instance crashes any other replicas waiting to take over
+# will by default wait 25 minutes until the lock times out and they can acquire
+# the lock to start scheduling tasks again.
+# Instead we just set it to be slightly longer than the loop interval that beat uses.
+# This means beat wakes up, checks the schedule and extends the lock every
+# CELERY_BEAT_MAX_LOOP_INTERVAL seconds. If it crashes or fails to wake up
+# then 80 seconds after the lock was last extended it will be released and a new
+# scheduler will acquire the lock and take over.
+CELERY_REDBEAT_LOCK_TIMEOUT = os.getenv(
+    "CELERY_REDBEAT_LOCK_TIMEOUT", CELERY_BEAT_MAX_LOOP_INTERVAL + 60
+)
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    },
+}
+
+# Database
+# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "blogs",
+        "USER": "root",
+        "PASSWORD": "root",
+        "HOST": "db",
+        "PORT": 3307,
+    }
+}
+
+
+USER_TABLE_DATABASE = "default"
+
+# Password validation
+# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "core.user.password_validation.MaximumLengthValidator",
+    },
+]
+
+# We need the `AllowAllUsersModelBackend` in order to respond with a proper error
+# message when the user is not active. The only thing it does, is allowing non active
+# users to authenticate, but the user still can't obtain or use a JWT token or database
+# token because the user needs to be active to use that.
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.AllowAllUsersModelBackend"]
+
+# Internationalization
+# https://docs.djangoproject.com/en/2.2/topics/i18n/
+
+LANGUAGE_CODE = "en"
+
+LANGUAGES = [
+    ("en", "English"),
+]
+
+TIME_ZONE = "UTC"
+
+USE_I18N = True
+
+USE_L10N = True
+
+USE_TZ = False
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
+
+STATIC_URL = "/static/"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "api.authentication.JSONWebTokenAuthentication",
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
+    "DEFAULT_SCHEMA_CLASS": "api.openapi.AutoSchema",
+}
+
+
+JWT_AUTH = {
+    "JWT_EXPIRATION_DELTA": datetime.timedelta(seconds=60 * 60),
+    "JWT_ALLOW_REFRESH": True,
+    "JWT_REFRESH_EXPIRATION_DELTA": datetime.timedelta(days=7),
+    "JWT_AUTH_HEADER_PREFIX": "JWT",
+    "JWT_RESPONSE_PAYLOAD_HANDLER": "api.user.jwt.jwt_response_payload_handler",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "stockcnn API spec",
+    "DESCRIPTION": "",
+    "CONTACT": {"url": "https://io/contact"},
+    "LICENSE": {
+        "name": "MIT",
+        "url": "https://gitlab.com/bramw/stockcnn/-/blob/master/LICENSE",
+    },
+    "VERSION": "1.7.1",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "TAGS": [
+        {"name": "Settings"},
+        {"name": "User"},
+        {"name": "User files"},
+        {"name": "Groups"},
+        {"name": "Group invitations"},
+        {"name": "Templates"},
+        {"name": "Trash"},
+        {"name": "Applications"},
+        {"name": "Database tables"},
+        {"name": "Database table fields"},
+        {"name": "Database table views"},
+        {"name": "Database table view filters"},
+        {"name": "Database table view sortings"},
+        {"name": "Database table grid view"},
+        {"name": "Database table gallery view"},
+        {"name": "Database table form view"},
+        {"name": "Database table kanban view"},
+        {"name": "Database table rows"},
+        {"name": "Database table export"},
+        {"name": "Database table webhooks"},
+        {"name": "Database tokens"},
+        {"name": "Admin"},
+    ],
+    "ENUM_NAME_OVERRIDES": {
+        "NumberDecimalPlacesB02Enum": [
+            (0, "1"),
+            (1, "1.0"),
+            (2, "1.00"),
+            (3, "1.000"),
+            (4, "1.0000"),
+            (5, "1.00000"),
+        ],
+        "NumberDecimalPlaces0c0Enum": [
+            (1, "1.0"),
+            (2, "1.00"),
+            (3, "1.000"),
+            (4, "1.0000"),
+            (5, "1.00000"),
+        ],
+    },
+}
+
+# The storage must always overwrite existing files.
+DEFAULT_FILE_STORAGE = "core.storage.OverwriteFileSystemStorage"
+
+PUBLIC_BACKEND_URL = os.getenv("PUBLIC_BACKEND_URL", "http://localhost:8000")
+PUBLIC_WEB_FRONTEND_URL = os.getenv("PUBLIC_WEB_FRONTEND_URL", "http://localhost:3000")
+PRIVATE_BACKEND_URL = os.getenv("PRIVATE_BACKEND_URL", "http://backend:8000")
+PUBLIC_BACKEND_HOSTNAME = urlparse(PUBLIC_BACKEND_URL).hostname
+PUBLIC_WEB_FRONTEND_HOSTNAME = urlparse(PUBLIC_WEB_FRONTEND_URL).hostname
+PRIVATE_BACKEND_HOSTNAME = urlparse(PRIVATE_BACKEND_URL).hostname
+
+if PUBLIC_BACKEND_HOSTNAME:
+    ALLOWED_HOSTS.append(PUBLIC_BACKEND_HOSTNAME)
+
+if PRIVATE_BACKEND_HOSTNAME:
+    ALLOWED_HOSTS.append(PRIVATE_BACKEND_HOSTNAME)
+
+FROM_EMAIL = os.getenv("FROM_EMAIL", "no-reply@localhost")
+RESET_PASSWORD_TOKEN_MAX_AGE = 60 * 60 * 48  # 48 hours
+ROW_PAGE_SIZE_LIMIT = 200  # How many rows can be requested at once.
+TRASH_PAGE_SIZE_LIMIT = 200  # How many trash entries can be requested at once.
+ROW_COMMENT_PAGE_SIZE_LIMIT = 200  # How many row comments can be requested at once.
+
+# The amount of rows that can be imported when creating a table.
+INITIAL_TABLE_DATA_LIMIT = None
+if "INITIAL_TABLE_DATA_LIMIT" in os.environ:
+    INITIAL_TABLE_DATA_LIMIT = int(os.getenv("INITIAL_TABLE_DATA_LIMIT"))
+
+MEDIA_URL_PATH = "/media/"
+MEDIA_URL = os.getenv("MEDIA_URL", urljoin(PUBLIC_BACKEND_URL, MEDIA_URL_PATH))
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", "/stockcnn/media")
+
+# Indicates the directory where the user files and user thumbnails are stored.
+USER_FILES_DIRECTORY = "user_files"
+USER_THUMBNAILS_DIRECTORY = "thumbnails"
+USER_FILE_SIZE_LIMIT = 1024 * 1024 * 20  # 20MB
+
+EXPORT_FILES_DIRECTORY = "export_files"
+EXPORT_CLEANUP_INTERVAL_MINUTES = 5
+EXPORT_FILE_EXPIRE_MINUTES = 60
+
+EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
+
+if os.getenv("EMAIL_SMTP", ""):
+    CELERY_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    # EMAIL_SMTP_USE_TLS OR EMAIL_SMTP_USE_TLS for backwards compatibility after
+    # fixing #448.
+    EMAIL_USE_TLS = bool(os.getenv("EMAIL_SMTP_USE_TLS", "")) or bool(
+        os.getenv("EMAIL_SMPT_USE_TLS", "")
+    )
+    EMAIL_HOST = os.getenv("EMAIL_SMTP_HOST", "localhost")
+    EMAIL_PORT = os.getenv("EMAIL_SMTP_PORT", "25")
+    EMAIL_HOST_USER = os.getenv("EMAIL_SMTP_USER", "")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_SMTP_PASSWORD", "")
+else:
+    CELERY_EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Configurable thumbnails that are going to be generated when a user uploads an image
+# file.
+USER_THUMBNAILS = {"tiny": [None, 21], "small": [48, 48]}
+
+# The directory that contains the all the templates in JSON format. When for example
+# the `sync_templates` management command is called, then the templates in the
+# database will be synced with these files.
+APPLICATION_TEMPLATES_DIR = os.path.join(BASE_DIR, "../../../templates")
+# The template that must be selected when the user first opens the templates select
+# modal.
+DEFAULT_APPLICATION_TEMPLATE = "project-tracker"
+
+MAX_FIELD_LIMIT = 1500
+
+# If you change this default please also update the default for the web-frontend found
+# in web-frontend/modules/core/module.js:55
+HOURS_UNTIL_TRASH_PERMANENTLY_DELETED = os.getenv(
+    "HOURS_UNTIL_TRASH_PERMANENTLY_DELETED", 24 * 3
+)
+OLD_TRASH_CLEANUP_CHECK_INTERVAL_MINUTES = 5
+
+MAX_ROW_COMMENT_LENGTH = 10000
+
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+# For now force the old os dependant behaviour of file uploads as users might be relying
+# on it. See
+# https://docs.djangoproject.com/en/3.2/releases/3.0/#new-default-value-for-the-file-upload-permissions-setting
+FILE_UPLOAD_PERMISSIONS = None
+
+MAX_FORMULA_STRING_LENGTH = 10000
+MAX_FIELD_REFERENCE_DEPTH = 1000
+UPDATE_FORMULAS_AFTER_MIGRATION = bool(
+    os.getenv("UPDATE_FORMULAS_AFTER_MIGRATION", "yes")
+)
+
+WEBHOOKS_MAX_CONSECUTIVE_TRIGGER_FAILURES = 8
+WEBHOOKS_MAX_RETRIES_PER_CALL = 8
+WEBHOOKS_MAX_PER_TABLE = 20
+WEBHOOKS_MAX_CALL_LOG_ENTRIES = 10
+WEBHOOKS_REQUEST_TIMEOUT_SECONDS = 5
+
+# ======== WARNING ========
+# Please read and understand everything at:
+# https://docs.djangoproject.com/en/3.2/ref/settings/#secure-proxy-ssl-header
+# before enabling this setting otherwise you can compromise your site’s security.
+# This setting will ensure the "next" urls provided by the various paginated API
+# endpoints will be returned with https when appropriate.
+# If using gunicorn also behind the proxy you might also need to set
+# --forwarded-allow-ips='*'. See the following link for more information:
+# https://stackoverflow.com/questions/62337379/how-to-append-nginx-ip-to-x-forwarded
+# -for-in-kubernetes-nginx-ingress-controller
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+AUTH_API = 'http://172.20.0.1:8081'
+AUTH_USER_MODEL = 'user.NewUser'
