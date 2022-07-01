@@ -6,19 +6,19 @@ from .serializers import RegisterUserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
-from .models import NewUser
+from .models import CreateUserModel
 
 
 class CustomUserCreate(APIView):
     permission_classes = [AllowAny]
 
-    def post(self,request):
+    def post(self, request):
 
         email = request.data['email']
         try:
-            user = NewUser.objects.get(email=email)
+            user = CreateUserModel.objects.get(email=email)
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        except NewUser.DoesNotExist:
+        except CreateUserModel.DoesNotExist:
             reg_serializer = RegisterUserSerializer(data=request.data)
             if reg_serializer.is_valid():
                 reg_serializer.save()
@@ -29,7 +29,7 @@ class CustomUserCreate(APIView):
 class BlacklistTokenView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self,request):
+    def post(self, request):
         try:
             refresh_token = request.data["refresh_token"]
             token = RefreshToken(refresh_token)

@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import NewUser
+from .models import CreateUserModel
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = NewUser
+        model = CreateUserModel
         fields = ('email','user_name','password')
         extra_kwargs = {'password':{'write_only': True}}
 

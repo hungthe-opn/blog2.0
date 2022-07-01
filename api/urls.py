@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.contrib import admin
 
 from drf_spectacular.views import SpectacularJSONAPIView, SpectacularRedocView
 
@@ -11,6 +12,7 @@ app_name = "api"
 
 urlpatterns = (
     [
+
         path("schema.json", SpectacularJSONAPIView.as_view(), name="json_schema"),
         path(
             "redoc/",

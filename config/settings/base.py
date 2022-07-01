@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_THIS_TO_SOMETHING_SECRET_IN_PRODUCT
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['198.211.99.20', 'localhost', '127.0.0.1','0.0.0.0','10.1.15.34', '172.20.0.1']
+ALLOWED_HOSTS = ['198.211.99.20', 'localhost', '127.0.0.1', '0.0.0.0', '10.1.15.34', '172.20.0.1', '172.29.0.1']
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "WebSocketId",
@@ -22,6 +22,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 INSTALLED_APPS = [
     "django.contrib.auth",
+    "django.contrib.admin",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
@@ -38,7 +39,7 @@ INSTALLED_APPS = [
     "apps.forum",
     "apps.comment",
     "apps.user",
-
+    "apps.categorys",
 ]
 
 ADDITIONAL_APPS = os.getenv("ADDITIONAL_APPS", None)
@@ -139,7 +140,6 @@ DATABASES = {
     }
 }
 
-
 USER_TABLE_DATABASE = "default"
 
 # Password validation
@@ -191,7 +191,6 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_SCHEMA_CLASS": "api.openapi.AutoSchema",
 }
-
 
 JWT_AUTH = {
     "JWT_EXPIRATION_DELTA": datetime.timedelta(seconds=60 * 60),
@@ -364,4 +363,4 @@ WEBHOOKS_REQUEST_TIMEOUT_SECONDS = 5
 # -for-in-kubernetes-nginx-ingress-controller
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 AUTH_API = 'http://172.20.0.1:8081'
-AUTH_USER_MODEL = 'user.NewUser'
+AUTH_USER_MODEL = 'user.CreateUserModel'

@@ -2,18 +2,22 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.forms import TextInput, Textarea, CharField
 from django.db import models
-from .models import NewUser
+from .models import CreateUserModel
+
+
 # Register your models here.
+
+
 class UserAdminConfig(UserAdmin):
-    model = NewUser
+    model = CreateUserModel
     search_fields = ('email', 'user_name', 'first_name',)
-    list_filter = ('email', 'user_name', 'first_name', 'is_active', 'is_staff')
+    list_filter = ('email', 'user_name', 'first_name', 'is_active', 'is_staff', 'is_author',)
     ordering = ('-start_date',)
     list_display = ('email', 'user_name', 'first_name',
-                    'is_active', 'is_staff')
+                    'is_active', 'is_staff', 'is_author', 'rank',)
     fieldsets = (
-        (None, {'fields': ('email', 'user_name', 'first_name',)}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        (None, {'fields': ('email', 'user_name', 'first_name', 'rank',)}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'is_author',)}),
         ('Personal', {'fields': ('about',)}),
     )
     formfield_overrides = {
@@ -27,4 +31,4 @@ class UserAdminConfig(UserAdmin):
     )
 
 
-admin.site.register(NewUser, UserAdminConfig)
+admin.site.register(CreateUserModel, UserAdminConfig)
