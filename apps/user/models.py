@@ -60,3 +60,6 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.user_name
 
+    def save(self, *args, **kwargs):
+        super(CreateUserModel, self).save(*args, **kwargs)
+        self.name = str(self.rank.encode('unicode_escape'))

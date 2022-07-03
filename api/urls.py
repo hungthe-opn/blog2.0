@@ -22,6 +22,13 @@ urlpatterns = (
         path("user/", include(user_urls, namespace="user")),
         path("user-files/", include(user_files_urls, namespace="user_files")),
         path('user/', include('apps.user.urls', namespace="user_create")),
+        path("blog/", include('apps.blog_it.urls', namespace="blog_it")),
+        path("category/", include('apps.categorys.urls', namespace="category")),
+        path("comment/", include('apps.comment.urls', namespace="comment")),
+        path("contact/", include('apps.contact.urls', namespace="contact")),
+        path("forum/", include('apps.forum.urls', namespace="forum")),
+        path("user-blog/", include('apps.user.urls', namespace="user")),
+
         # path('type/', include('apps.type.urls', namespace="types")),
         # path('repository/', include('apps.repository.urls', namespace="repository")),
         # path('lend/', include('apps.lend.urls', namespace="lend")),
