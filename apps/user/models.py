@@ -50,6 +50,7 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     start_date = models.DateTimeField(default=timezone.now)
     about = models.TextField(_('about'), max_length=500, blank=True)
     rank = models.CharField(max_length=30, choices=RankModel.choices, default=RankModel.Lv1)
+    image = models.ImageField(_('image'), max_length=100, blank=True)
     is_admin = models.BooleanField(default=False)
     is_author = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

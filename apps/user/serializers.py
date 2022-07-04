@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import CreateUserModel
 
 
@@ -15,3 +16,20 @@ class RegisterUserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+
+class UpdateInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreateUserModel
+        fields = ('id','user_name', 'first_name', 'about','image')
+
+    # def update(self,instance, validated_data):
+    #     instance.user_name = validated_data.get('user_name', instance.user_name)
+    #     try:
+    #         False
+    #     except CreateUserModel.DoesNotExist:
+    #         instance.save()
+    #     return instance
+
+
+

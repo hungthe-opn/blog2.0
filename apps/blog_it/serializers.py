@@ -12,7 +12,7 @@ class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogModel
         fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
-                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description']
+                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description','featured']
 
     def get_author_id(self, obj):
         return obj.author_id
@@ -41,7 +41,7 @@ class BlogDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogModel
         fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
-                  'image', 'source', 'view_count', 'time_post', 'time_update', 'upvote', 'description']
+                  'image', 'source', 'view_count', 'time_post', 'time_update', 'upvote', 'description','featured']
 
     def get_author_id(self, obj):
         return obj.author_id
@@ -64,6 +64,7 @@ class BlogDetailSerializer(serializers.ModelSerializer):
         for upvote in upvote_list:
             counter += upvote.value
         return counter
+
 
 class UpvoteSerializer(serializers.ModelSerializer):
     class Meta:

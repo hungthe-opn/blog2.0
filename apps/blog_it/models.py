@@ -35,6 +35,7 @@ class BlogModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     time_post = models.DateTimeField(default=datetime.now, blank=True)
     time_update = models.DateTimeField(default=datetime.now, blank=True)
+    featured = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title

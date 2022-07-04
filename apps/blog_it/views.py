@@ -20,10 +20,7 @@ class BlogView(PaginationAPIView):
     def get(self, request):
         queryset = BlogModel.objects.all().order_by('-time_post')
         serializer = BlogSerializer(queryset, many=True)
-        print(serializer)
         result = self.paginate_queryset(serializer.data)
-        print(result)
-
         return self.get_paginated_response(result)
 
 
@@ -36,6 +33,17 @@ class BlogDetailView(APIView):
         queryset.save()
         serializer = BlogDetailSerializer(queryset)
         return Response(custom_response(serializer.data), status=status.HTTP_201_CREATED)
+
+
+class BlogListPeaturedView(PaginationAPIView):
+
+    paginate_queryset = CustomPagination
+
+    def get(self, request):
+        queryset = BlogModel.objects.filter(featured=True).order_by('-time_post').first()
+        serializer = BlogSerializer(queryset)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)
 
 
 class UpvoteView(APIView):
