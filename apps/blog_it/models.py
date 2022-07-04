@@ -30,10 +30,11 @@ class BlogModel(models.Model):
     image = models.ImageField(max_length=100, null=True)
     description = models.TextField()
     source = models.CharField(max_length=255, null=True, blank=True)
-    view_count = models.IntegerField()
+    view_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     time_post = models.DateTimeField(default=datetime.now, blank=True)
+    time_update = models.DateTimeField(default=datetime.now, blank=True)
 
     def __str__(self):
         return self.title
@@ -45,7 +46,7 @@ class BlogModel(models.Model):
 class SeriesModel(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author')
     category = models.ForeignKey(CategoryModel, related_name='series_category', on_delete=models.CASCADE)
-    name = models.CharField(max_length=250, )
+    name = models.CharField(max_length=250)
     image = models.ImageField(max_length=100, null=True)
     slug = models.SlugField()
     description = models.TextField()
@@ -71,7 +72,7 @@ class SeriesBlogModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
     class Meta:
         db_table = 'series_blog'
@@ -83,9 +84,10 @@ class UpvoteModel(models.Model):
     series = models.ForeignKey(SeriesModel, on_delete=models.CASCADE, related_name='upvote_series', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    value = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.series
+        return self.series.name
 
     class Meta:
         db_table = 'upvote'

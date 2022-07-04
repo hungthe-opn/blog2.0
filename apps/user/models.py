@@ -14,6 +14,7 @@ class CusCustomAccountManager(BaseUserManager):
         other_fields.setdefault('is_author', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
+        other_fields.setdefault('is_report', False)
 
         if other_fields.get('is_author') is not True:
             raise ValueError('Superuser = True')
@@ -53,6 +54,8 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     is_author = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
+    is_report = models.BooleanField(default=False)
+
     objects = CusCustomAccountManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['user_name', 'first_name']
