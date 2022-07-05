@@ -36,22 +36,22 @@ class CustomUserCreate(APIView):
 class UpdateInformationView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self,request,):
+    def patch(self, request, ):
         forms = request.data
         data = {
-            'id':request.user.id,
-            'user_name':forms.get('user_name'),
-            'first_name':forms.get('first_name'),
-            'about':forms.get('about'),
-            'image':forms.get('image')
+            'id': request.user.id,
+            'user_name': forms.get('user_name'),
+            'first_name': forms.get('first_name'),
+            'about': forms.get('about'),
+            'image': forms.get('image')
         }
-        try:
-            user_name = CreateUserModel.objects.get(user_name=forms.get('user_name'))
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        except CreateUserModel.DoesNotExist:
+        user_name = CreateUserModel.objects.filter(user_name=forms.get('user_name')).first()
+        if user_name is not None:
+            return Response({'message': 'Tên đăng nhập đã tồn tại, vui lòng thử lại!'},
+                        status=status.HTTP_400_BAD_REQUEST)
+        else:
             query = CreateUserModel.objects.filter(id=request.user.id).first()
-            serializer = UpdateInformationSerializer(query,data=data)
-            print('11111111111111111111',serializer)
+            serializer = UpdateInformationSerializer(query, data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(custom_response(serializer.data, msg_display='Cập nhật thông tin thành công!'),

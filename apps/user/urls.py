@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CustomUserCreate, BlacklistTokenView,UpdateInformationView
+from .views import CustomUserCreate, BlacklistTokenView, UpdateInformationView
 
 app_name = 'users'
 urlpatterns = [

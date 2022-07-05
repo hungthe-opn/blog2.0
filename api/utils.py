@@ -398,3 +398,4 @@ def custom_response(res, list=True, response_code=200, response_msg='SUCCESS', m
     if msg_display != '':
         response['msg_display'] = msg_display
     return response
+

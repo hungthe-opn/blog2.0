@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from api.pagination import CustomPagination, PaginationAPIView
 from api.utils import convert_date_front_to_back, custom_response
@@ -11,7 +12,8 @@ from api.permissions import IsAdmin, IsReport, IsAuthor
 
 from apps.blog_it.models import BlogModel, UpvoteModel
 from apps.blog_it.serializers import BlogSerializer
-from apps.empl.serializers import AddBlogSerializer
+from apps.empl.serializers import AddBlogSerializer, UserRoleSerializer
+from apps.user.models import CreateUserModel
 
 
 class AddBlogView(APIView):
@@ -73,4 +75,11 @@ class UpdateBlogView(APIView):
         return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
 
 
+class UserRoleView(APIView):
+    permission_classes = (IsAuthenticated,)
 
+    def get(self, request):
+        queryset = CreateUserModel.objects.filter(id=request.user.id).first()
+        serializer = UserRoleSerializer(queryset)
+        return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
+                        status=status.HTTP_201_CREATED)

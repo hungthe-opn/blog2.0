@@ -88,7 +88,7 @@ class UpvoteModel(models.Model):
     value = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.series.name
+        return self.blog.title
 
     class Meta:
         db_table = 'upvote'

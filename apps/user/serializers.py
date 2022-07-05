@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
 
 from .models import CreateUserModel
 
@@ -21,7 +22,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class UpdateInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreateUserModel
-        fields = ('id','user_name', 'first_name', 'about','image')
+        fields = ('id', 'user_name', 'first_name', 'about', 'image')
 
     # def update(self,instance, validated_data):
     #     instance.user_name = validated_data.get('user_name', instance.user_name)
@@ -32,4 +33,20 @@ class UpdateInformationSerializer(serializers.ModelSerializer):
     #     return instance
 
 
+class TokenObtainPairSerializer(TokenObtainSerializer):
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
 
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        if api_settings.UPDATE_LAST_LOGIN:
+            update_last_login(None, self.user)
+
+        return data

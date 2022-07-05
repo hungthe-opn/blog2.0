@@ -15,6 +15,7 @@ from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, Upvot
 
 class BlogView(PaginationAPIView):
     pagination_class = CustomPagination
+
     # permission_classes = [IsAdmin]
 
     def get(self, request):
@@ -36,12 +37,12 @@ class BlogDetailView(APIView):
 
 
 class BlogListPeaturedView(PaginationAPIView):
-
     paginate_queryset = CustomPagination
 
     def get(self, request):
-        queryset = BlogModel.objects.filter(featured=True).order_by('-time_post').first()
-        serializer = BlogSerializer(queryset)
+        queryset = BlogModel.objects.filter(featured__iexact=True).order_by('-time_post')
+        print('1111111111111111111',queryset)
+        serializer = BlogSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 
@@ -90,3 +91,20 @@ class DownvoteView(APIView):
                 serializer.save()
                 return Response(serializer.data)
             return Response({'message': 'err'})
+
+
+class CountBlogView(APIView):
+
+    def get(self, request):
+        blogs = BlogModel.objects.all()
+        total_blogs = blogs.count()
+
+        total_views = sum(list(map(lambda blog: blog.view_count, blogs)))
+        return Response({
+            'data': {
+                'total_views': total_views,
+                'total_blogs': total_blogs,
+            }
+
+        }
+            , status=status.HTTP_400_BAD_REQUEST)

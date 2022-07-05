@@ -12,7 +12,7 @@ class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogModel
         fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
-                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description','featured']
+                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description', 'featured']
 
     def get_author_id(self, obj):
         return obj.author_id
@@ -41,7 +41,7 @@ class BlogDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogModel
         fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
-                  'image', 'source', 'view_count', 'time_post', 'time_update', 'upvote', 'description','featured']
+                  'image', 'source', 'view_count', 'time_post', 'time_update', 'upvote', 'description', 'featured']
 
     def get_author_id(self, obj):
         return obj.author_id
@@ -70,3 +70,19 @@ class UpvoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UpvoteModel
         fields = ('id', 'author', 'blog', 'series', 'value')
+
+
+class QuantityBlogSerializer(serializers.ModelSerializer):
+    category_quantity = serializers.SerializerMethodField()
+    category_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BlogModel
+        fields = ['id', 'category_name', 'category_quantity']
+
+    def get_category_quantity(self, obj):
+        quantity = obj.category.category.all().count()
+        return quantity
+
+    def get_category_name(self, obj):
+        return obj.category.name
