@@ -37,11 +37,12 @@ class BlogDetailView(APIView):
 
 
 class BlogListPeaturedView(PaginationAPIView):
-    paginate_queryset = CustomPagination
+    pagination_class = CustomPagination
+
+    # permission_classes = [IsAdmin]
 
     def get(self, request):
-        queryset = BlogModel.objects.filter(featured__iexact=True).order_by('-time_post')
-        print('1111111111111111111',queryset)
+        queryset = BlogModel.objects.filter(featured=True).order_by('-time_post')
         serializer = BlogSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
