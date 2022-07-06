@@ -1,5 +1,8 @@
+from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CreateUserModel
 
@@ -50,3 +53,9 @@ class TokenObtainPairSerializer(TokenObtainSerializer):
             update_last_login(None, self.user)
 
         return data
+
+
+class UserInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreateUserModel
+        fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image']
