@@ -43,20 +43,27 @@ class RankModel(models.TextChoices):
     Lv6 = 'Quản trị viên'
 
 
+class SexModel(models.TextChoices):
+    Male = 'Nam'
+    Female = 'Nữ'
+    Orther = 'Khác'
+    Secret = 'Bí mật'
+
+
 class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email add'), unique=True)
-    user_name = models.CharField(max_length=150, unique=True)
+    user_name = models.CharField(max_length=150, unique=True,null=True, default='Người mới')
     first_name = models.CharField(max_length=150, blank=True)
     start_date = models.DateTimeField(default=timezone.now)
     about = models.TextField(_('about'), max_length=500, blank=True)
     rank = models.CharField(max_length=30, choices=RankModel.choices, default=RankModel.Lv1)
-    image = models.ImageField(_('image'), max_length=100, blank=True)
+    image = models.ImageField(_('image'), max_length=100, null=True, blank=True)
     is_admin = models.BooleanField(default=False)
     is_author = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
     is_report = models.BooleanField(default=False)
-
+    sex = models.CharField(max_length=30, choices=SexModel.choices, default=SexModel.Male)
     objects = CusCustomAccountManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['user_name', 'first_name']

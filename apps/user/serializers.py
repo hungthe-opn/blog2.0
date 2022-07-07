@@ -27,13 +27,13 @@ class UpdateInformationSerializer(serializers.ModelSerializer):
         model = CreateUserModel
         fields = ('id', 'user_name', 'first_name', 'about', 'image')
 
-    # def update(self,instance, validated_data):
-    #     instance.user_name = validated_data.get('user_name', instance.user_name)
-    #     try:
-    #         False
-    #     except CreateUserModel.DoesNotExist:
-    #         instance.save()
-    #     return instance
+    def update(self,instance, validated_data):
+        instance.user_name = validated_data.get('user_name', instance.user_name)
+        try:
+            False
+        except CreateUserModel.DoesNotExist:
+            instance.save()
+        return instance
 
 
 class TokenObtainPairSerializer(TokenObtainSerializer):
@@ -58,4 +58,4 @@ class TokenObtainPairSerializer(TokenObtainSerializer):
 class UserInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreateUserModel
-        fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image']
+        fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image', 'sex']
