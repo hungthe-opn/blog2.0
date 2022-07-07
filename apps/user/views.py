@@ -43,7 +43,8 @@ class UpdateInformationView(APIView):
         return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
                         status=status.HTTP_200_OK)
 
-    def patch(self, request, ):
+    def patch(self, request):
+        print(request.data.get('user_name'))
         forms = request.data
         data = {
             'id': request.user.id,
@@ -54,6 +55,7 @@ class UpdateInformationView(APIView):
         }
         user_name = CreateUserModel.objects.filter(user_name=forms.get('user_name')).exclude(id=request.user.id)
         if len(user_name) != 0:
+            print(1111111111111111111)
             return Response({'message': 'Tên đăng nhập đã tồn tại, vui lòng thử lại!'},
                             status=status.HTTP_400_BAD_REQUEST)
         else:

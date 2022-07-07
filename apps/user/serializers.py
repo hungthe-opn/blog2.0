@@ -27,13 +27,6 @@ class UpdateInformationSerializer(serializers.ModelSerializer):
         model = CreateUserModel
         fields = ('id', 'user_name', 'first_name', 'about', 'image')
 
-    def update(self,instance, validated_data):
-        instance.user_name = validated_data.get('user_name', instance.user_name)
-        try:
-            False
-        except CreateUserModel.DoesNotExist:
-            instance.save()
-        return instance
 
 
 class TokenObtainPairSerializer(TokenObtainSerializer):
