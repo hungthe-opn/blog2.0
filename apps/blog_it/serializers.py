@@ -2,23 +2,36 @@ from rest_framework import serializers
 from .models import *
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogTagModel
+        fields = ('title', )
+
+
 class BlogSerializer(serializers.ModelSerializer):
-    author_id = serializers.SerializerMethodField()
+    category_name = serializers.SerializerMethodField()
     category_id = serializers.SerializerMethodField()
     author_name = serializers.SerializerMethodField()
     rank = serializers.SerializerMethodField()
-    category_name = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
+    avatar_author = serializers.SerializerMethodField()
+    # tag_name = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogModel
-        fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
-                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description', 'featured']
+        fields = ['id', 'tags', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content',
+                  'slug',
+                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description', 'featured',
+                  'avatar_author']
 
     def get_author_id(self, obj):
         return obj.author_id
 
     def get_author_name(self, obj):
         return obj.author.user_name
+
+    def get_avatar_author(self, obj):
+        return obj.author.image.url
 
     def get_rank(self, obj):
         return obj.author.rank
@@ -29,6 +42,10 @@ class BlogSerializer(serializers.ModelSerializer):
     def get_category_name(self, obj):
         return obj.category.name
 
+    def get_tags(self, obj):
+        tags = obj.tag.all()
+        tag_serializer = TagSerializer(tags, many=True)
+        return tag_serializer.data
 
 class BlogDetailSerializer(serializers.ModelSerializer):
     author_id = serializers.SerializerMethodField()
