@@ -197,6 +197,8 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_SCHEMA_CLASS": "api.openapi.AutoSchema",
+'DATETIME_INPUT_FORMATS': '%Y-%m-%d %H:%M:%S',
+
 }
 
 JWT_AUTH = {

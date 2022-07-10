@@ -93,11 +93,6 @@ class DownvoteView(APIView):
                 return Response(serializer.data)
             return Response({'message': 'err'})
 
-# class CountUSerView(APIView):
-#     permission_classes = [IsAuthenticated]
-#     def get
-#
-
 
 class CountBlogView(APIView):
     permission_classes = [IsAuthenticated]

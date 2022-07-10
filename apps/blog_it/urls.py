@@ -10,5 +10,4 @@ urlpatterns = [
     path('downvote/<int:pk>', DownvoteView.as_view(), name='down_vote'),
     path('featured/', ListFeaturedView.as_view(), name='blog-detail'),
     path('count/', CountBlogView.as_view(), name='count-blog'),
-
 ]
