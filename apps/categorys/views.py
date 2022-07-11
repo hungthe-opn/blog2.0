@@ -6,7 +6,7 @@ from apps.categorys.models import CategoryModel
 
 
 # Create your views here.
-from apps.categorys.serializers import CategorySerializer
+from apps.categorys.serializers import CategorySerializer, CategoryBlogsSerializer
 
 
 class CategoryView(PaginationAPIView):
@@ -14,7 +14,7 @@ class CategoryView(PaginationAPIView):
 
     def get(self, request):
         category_query = CategoryModel.objects.all()
-        serializer = CategorySerializer(category_query, many=True)
+        serializer = CategoryBlogsSerializer(category_query, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 
@@ -24,7 +24,7 @@ class CategoryDetailView(PaginationAPIView):
 
     def get(self, request, pk):
         category_query = CategoryModel.objects.filter(id=pk)
-        serializer = CategorySerializer(category_query, many=True)
+        serializer = CategoryBlogsSerializer(category_query, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 

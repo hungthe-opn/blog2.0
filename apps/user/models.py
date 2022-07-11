@@ -74,3 +74,11 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         super(CreateUserModel, self).save(*args, **kwargs)
         self.name = str(self.rank.encode('unicode_escape'))
+
+
+class Follow(models.Model):
+    from_user = models.ForeignKey(CreateUserModel, related_name='follower', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(CreateUserModel, related_name='follow_target', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('from_user', 'to_user')

@@ -36,8 +36,7 @@ class BlogModel(models.Model):
     time_post = models.DateTimeField(default=datetime.now, blank=True)
     time_update = models.DateTimeField(default=datetime.now, blank=True)
     featured = models.BooleanField(default=False)
-
-
+    time_read = models.CharField(default=5, max_length=30)
 
     def __str__(self):
         return self.title

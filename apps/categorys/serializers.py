@@ -18,7 +18,6 @@ class CategoryBlogsSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'counter']
 
     def get_counter(self, obj):
-        post = obj.all().filter(id__category=id)
-        post_count = post.count()
-        return post_count
+        post = obj.category.count()
+        return post
 

@@ -22,7 +22,7 @@ class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogModel
         fields = ['id', 'tags', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content',
-                  'slug',
+                  'slug', 'time_read',
                   'image', 'source', 'view_count', 'time_post', 'time_update', 'description', 'featured', 'author_email',
                   'avatar_author']
 
@@ -69,7 +69,7 @@ class BlogDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogModel
         fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug', 'author_email',
-                  'avatar_author',
+                  'avatar_author', 'time_read',
                   'image', 'source', 'view_count', 'time_post', 'time_update', 'upvote', 'description', 'featured']
 
     def get_author_id(self, obj):
