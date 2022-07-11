@@ -12,7 +12,7 @@ from api.permissions import IsAdmin, IsReport, IsAuthor
 
 from apps.blog_it.models import BlogModel, UpvoteModel
 from apps.blog_it.serializers import BlogSerializer
-from apps.empl.serializers import AddBlogSerializer, UserRoleSerializer
+from apps.empl.serializers import AddBlogSerializer, UserRoleSerializer, DeleteBlogSerializer
 from apps.user.models import CreateUserModel
 
 
@@ -83,3 +83,13 @@ class UserRoleView(APIView):
         serializer = UserRoleSerializer(queryset)
         return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
                         status=status.HTTP_201_CREATED)
+
+
+class DeleteExportManageView(APIView):
+    permission_classes = [IsAdmin | IsAuthor]
+
+    def delete(self, request, pk):
+        queryset = BlogModel.objects.filter(id=pk)
+        serializer = DeleteBlogSerializer(queryset)
+        queryset.delete()
+        return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết h công'))

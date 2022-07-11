@@ -29,3 +29,9 @@ class UserRoleSerializer(serializers.ModelSerializer):
         else:
             role = 'user'
         return role
+
+
+class DeleteBlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogModel
+        fields = ['id']
