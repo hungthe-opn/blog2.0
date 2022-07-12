@@ -1,18 +1,16 @@
-from django.shortcuts import render
-from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-from api.pagination import CustomPagination, PaginationAPIView
-from api.utils import convert_date_front_to_back, custom_response
-from datetime import date, timedelta, datetime
-from django.db.models import Q
-from rest_framework import status
-from rest_framework.response import Response
-from api.permissions import IsAdmin, IsReport, IsAuthor
+from datetime import datetime
 
-from apps.blog_it.models import BlogModel, UpvoteModel
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from api.permissions import IsAdmin, IsAuthor
+from api.utils import custom_response
+from apps.blog_it.models import BlogModel, BlogTagModel
 from apps.blog_it.serializers import BlogSerializer
-from apps.empl.serializers import AddBlogSerializer, UserRoleSerializer, DeleteBlogSerializer
+from apps.empl.serializers import AddBlogSerializer, UserRoleSerializer, DeleteBlogSerializer, EditBlogSerializer
 from apps.user.models import CreateUserModel
 
 
@@ -34,9 +32,14 @@ class AddBlogView(APIView):
             'time_post': datetime.now(),
             'description': forms.get('description')
         }
+        tags = forms.get('tags')
         serializer = AddBlogSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            blog = serializer.save()
+            for tag in tags:
+                tag_object = BlogTagModel.objects.filter(id=tag.get('id')).first()
+                if tag_object is not None:
+                    blog.tag.add(tag_object)
             return Response(custom_response(serializer.data, msg_display='Thêm bài viết thành công !'),
                             status=status.HTTP_201_CREATED)
         return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
@@ -93,3 +96,26 @@ class DeleteExportManageView(APIView):
         serializer = DeleteBlogSerializer(queryset)
         queryset.delete()
         return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết h công'))
+
+
+class UpdateInsuranceView(APIView):
+    permission_classes = [IsAdmin | IsAuthor]
+
+    def patch(self, request, pk, *args, **kwargs):
+        queryset = BlogModel.objects.filter(id=pk).first()
+        data = {
+            'category': request.data.get('category'),
+            'title': request.data.get('title'),
+            'description': request.data.get('description'),
+            'slug': request.data.get('slug'),
+            'content': request.data.get('content'),
+            'source': request.data.get('source'),
+        }
+        serializer = EditBlogSerializer(queryset, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
+                            status=status.HTTP_201_CREATED)
+        return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
+                                        msg_display='Cập nhật bài viết thuất bại, vui lòng thử lại sau'),
+                        status=status.HTTP_400_BAD_REQUEST)

@@ -35,3 +35,10 @@ class DeleteBlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogModel
         fields = ['id']
+
+
+class EditBlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogModel
+        fields = ['id', 'author', 'category', 'title', 'image', 'description', 'slug', 'content', 'stt',
+                  'source']

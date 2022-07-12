@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from api.permissions import IsAdmin, IsReport
 
 # Create your views here.
-from apps.blog_it.models import BlogModel, UpvoteModel
-from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, UpvoteSerializer
+from apps.blog_it.models import BlogModel, UpvoteModel, BlogTagModel
+from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, UpvoteSerializer, TagSerializer
 
 
 class BlogView(PaginationAPIView):
@@ -38,6 +38,18 @@ class BlogDetailView(APIView):
         return Response(custom_response(serializer.data), status=status.HTTP_201_CREATED)
 
 
+class TagBlog(PaginationAPIView):
+    pagination_class = CustomPagination
+
+    # permission_classes = [IsAdmin]
+
+    def get(self, request):
+        queryset = BlogTagModel.objects.all()
+        serializer = TagSerializer(queryset, many=True)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)
+
+
 class ListFeaturedView(APIView):
 
     # permission_classes = [IsAdmin]
@@ -55,9 +67,9 @@ class UpvoteView(APIView):
             if existing_upvote.value == -1:
                 existing_upvote.value = 1
                 existing_upvote.save()
-                return Response({'message': 'downvote to upvote'})
+                return Response({'message': 'downvote to upvote'} ,status=status.HTTP_200_OK)
             else:
-                return Response({'message': 'upvoted before'})
+                return Response({'message': 'upvoted before'},status=status.HTTP_400_BAD_REQUEST)
         else:
             data = {
                 "author": request.user.id,
@@ -67,7 +79,8 @@ class UpvoteView(APIView):
             serializer = UpvoteSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
+                                status=status.HTTP_201_CREATED)
             return Response({'message': 'err'})
 
 
@@ -90,7 +103,8 @@ class DownvoteView(APIView):
             serializer = UpvoteSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
+                                status=status.HTTP_201_CREATED)
             return Response({'message': 'err'})
 
 
