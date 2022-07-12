@@ -33,7 +33,7 @@ urlpatterns = (
         path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
         # path("comment/", include('apps.comment.urls', namespace="comment")),
         # path("contact/", include('apps.contact.urls', namespace="contact")),
-        # path("forum/", include('apps.forum.urls', namespace="forum")),
+        path("forum/", include('apps.forum.urls', namespace="forum")),
         path("user-blog/", include('apps.user.urls', namespace="user")),
 
     ]

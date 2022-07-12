@@ -10,7 +10,7 @@ class ForumModel(models.Model):
     image = models.ImageField(max_length=100, null=True)
     description = models.TextField()
     content = models.TextField()
-    stt = models.IntegerField()
+    stt = models.IntegerField(default=1, max_length=22)
     view_count = models.IntegerField()
     featured = models.BooleanField(default=False)
     notify = models.TextField()
