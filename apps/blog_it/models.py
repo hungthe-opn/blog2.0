@@ -125,7 +125,7 @@ class UpvoteModel(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='upvote_author')
     blog = models.ForeignKey(BlogModel, on_delete=models.CASCADE, related_name='blog', null=True)
     series = models.ForeignKey(SeriesModel, on_delete=models.CASCADE, related_name='upvote_series', null=True)
-    forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='forum_blog', null=True)
+    # forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='forum_blog', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     value = models.IntegerField(default=1)

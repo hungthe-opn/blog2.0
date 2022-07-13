@@ -41,9 +41,9 @@ class TagBlog(PaginationAPIView):
 
 
 class BlogDetailView(APIView):
-    def get(self, request):
-        queryset = BlogModel.objects.all()
-        serializer = BlogDetailSerializer(queryset, many=True)
+    def get(self, request,slug):
+        queryset = BlogModel.objects.all().first()
+        serializer = BlogDetailSerializer(queryset)
         return Response(custom_response(serializer.data), status=status.HTTP_201_CREATED)
 
     def get_object(self):
