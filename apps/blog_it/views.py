@@ -17,6 +17,7 @@ from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, Upvot
 
 class BlogView(PaginationAPIView):
     pagination_class = CustomPagination
+    lookup_field = 'slug'
 
     # permission_classes = [IsAdmin]
 
@@ -25,17 +26,6 @@ class BlogView(PaginationAPIView):
         serializer = BlogSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
-
-
-class BlogDetailView(APIView):
-    # permission_classes = [IsReport | IsAdmin]
-
-    def get(self, request, pk):
-        queryset = BlogModel.objects.filter(id=pk).order_by('-time_post').first()
-        queryset.view_count += 1
-        queryset.save()
-        serializer = BlogDetailSerializer(queryset)
-        return Response(custom_response(serializer.data), status=status.HTTP_201_CREATED)
 
 
 class TagBlog(PaginationAPIView):
@@ -49,6 +39,18 @@ class TagBlog(PaginationAPIView):
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 
+
+class BlogDetailView(APIView):
+    def get(self, request):
+        queryset = BlogModel.objects.all()
+        serializer = BlogDetailSerializer(queryset, many=True)
+        return Response(custom_response(serializer.data), status=status.HTTP_201_CREATED)
+
+    def get_object(self):
+        obj = super().get_object()
+        obj.view_count += 1
+        obj.save()
+        return obj
 
 class ListFeaturedView(APIView):
 
@@ -67,9 +69,9 @@ class UpvoteView(APIView):
             if existing_upvote.value == -1:
                 existing_upvote.value = 1
                 existing_upvote.save()
-                return Response({'message': 'downvote to upvote'} ,status=status.HTTP_200_OK)
+                return Response({'message': 'downvote to upvote'}, status=status.HTTP_200_OK)
             else:
-                return Response({'message': 'upvoted before'},status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'upvoted before'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             data = {
                 "author": request.user.id,

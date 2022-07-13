@@ -23,7 +23,6 @@ class AddBlogView(APIView):
             'author': request.user.id,
             'category': forms.get('category'),
             'title': forms.get('title'),
-            'slug': forms.get('slug'),
             'content': forms.get('content'),
             'image': forms.get('image'),
             'stt': 1,

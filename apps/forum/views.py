@@ -4,6 +4,7 @@ from django.db import transaction
 from datetime import date, timedelta
 from django.utils.decorators import method_decorator
 from rest_framework import status
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,7 +16,7 @@ from api.permissions import IsAdmin, IsAuthor
 from datetime import datetime, timedelta
 
 # Create your views here.
-from .serializers import AddBlogForumSerializer
+from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, DetailBlogForumSerializer
 from ..blog_it.models import BlogTagModel, BlogModel
 
 
@@ -29,7 +30,6 @@ class AddBlogForum(APIView):
             'category': forms.get('category'),
             'title': forms.get('title'),
             'content': forms.get('content'),
-            'image': forms.get('image'),
             'stt': 2,
             'view_count': 0,
             'time_post': datetime.now(),
@@ -50,13 +50,14 @@ class AddBlogForum(APIView):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
+# list blog in status = 2, admin check =3
 class ListBlogView(PaginationAPIView):
     pagination_class = CustomPagination
     permission_classes = [IsAdmin]
 
     def get(self, request):
         queryset = BlogModel.objects.filter(stt=2)
-        serializer = AddBlogForumSerializer(queryset, many=True)
+        serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 
@@ -65,9 +66,9 @@ class DetailForumView(PaginationAPIView):
     pagination_class = CustomPagination
     permission_classes = [IsAdmin]
 
-    def get(self, request,pk):
+    def get(self, request, pk):
         queryset = BlogModel.objects.filter(id=pk, stt=2)
-        serializer = AddBlogForumSerializer(queryset, many=True)
+        serializer = DetailBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 
@@ -77,7 +78,14 @@ class ListBlogUserView(PaginationAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        queryset = BlogModel.objects.filter(id=request.user.id,stt=2)
-        serializer = AddBlogForumSerializer(queryset, many=True)
+        queryset = BlogModel.objects.filter(id=request.user.id, stt=2)
+        serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
+
+
+class ListDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        queryset = BlogModel.objects.filter(id=pk, stt=2, author_id=request.user.id)

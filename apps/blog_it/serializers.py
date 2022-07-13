@@ -5,7 +5,7 @@ from .models import *
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogTagModel
-        fields = ('id','title', )
+        fields = ('id', 'title',)
 
 
 class BlogSerializer(serializers.ModelSerializer):
@@ -17,14 +17,17 @@ class BlogSerializer(serializers.ModelSerializer):
     avatar_author = serializers.SerializerMethodField()
     # tag_name = serializers.SerializerMethodField()
     author_email = serializers.SerializerMethodField()
+
     # upvote = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogModel
         fields = ['id', 'tags', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content',
                   'slug', 'time_read',
-                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description', 'featured', 'author_email',
+                  'image', 'source', 'view_count', 'time_post', 'time_update', 'description', 'featured',
+                  'author_email',
                   'avatar_author']
+        lookup_field = 'slug'
 
     def get_author_id(self, obj):
         return obj.author_id
@@ -47,9 +50,6 @@ class BlogSerializer(serializers.ModelSerializer):
     def get_category_name(self, obj):
         return obj.category.name
 
-
-
-
     def get_tags(self, obj):
         tags = obj.tag.all()
         tag_serializer = TagSerializer(tags, many=True)
@@ -65,16 +65,18 @@ class BlogDetailSerializer(serializers.ModelSerializer):
     upvote = serializers.SerializerMethodField()
     avatar_author = serializers.SerializerMethodField()
     author_email = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogModel
-        fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug', 'author_email',
-                  'avatar_author', 'time_read',
+        fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
+                  'author_email',
+                  'avatar_author', 'time_read', 'tags',
                   'image', 'source', 'view_count', 'time_post', 'time_update', 'upvote', 'description', 'featured']
+        lookup_field = 'slug'
 
     def get_author_id(self, obj):
         return obj.author_id
-
 
     def get_author_email(self, obj):
         return obj.author.email
@@ -100,6 +102,12 @@ class BlogDetailSerializer(serializers.ModelSerializer):
 
     def get_avatar_author(self, obj):
         return obj.author.image.url
+
+    def get_tags(self, obj):
+        tags = obj.tag.all()
+        tag_serializer = TagSerializer(tags, many=True)
+        return tag_serializer.data
+
 
 class UpvoteSerializer(serializers.ModelSerializer):
     class Meta:
