@@ -1,21 +1,15 @@
-from django.shortcuts import render
-from django.db.models import Q
-from django.db import transaction
-from datetime import date, timedelta
-from django.utils.decorators import method_decorator
+from datetime import datetime
+
 from rest_framework import status
-from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from api.pagination import CustomPagination, PaginationAPIView
-from api.utils import convert_date_front_to_back, custom_response
-from .models import *
-from api.permissions import IsAdmin, IsAuthor
-
-from datetime import datetime, timedelta
-
+from api.permissions import IsAdmin
+from api.utils import custom_response
 # Create your views here.
+from .models import ForumModel
 from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, DetailBlogForumSerializer
 from ..blog_it.models import BlogTagModel, BlogModel
 
@@ -78,14 +72,20 @@ class ListBlogUserView(PaginationAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        queryset = BlogModel.objects.filter(id=request.user.id, stt=2)
+        queryset = ForumModel.objects.filter(id=request.user.id, stt=2)
+        print(queryset)
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 
 
-class ListDetailView(APIView):
+class InforUser(PaginationAPIView):
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
     def get(self, request, pk):
-        queryset = BlogModel.objects.filter(id=pk, stt=2, author_id=request.user.id)
+        queryset = ForumModel.objects.filter(stt=2, author_id=pk)
+        print(queryset)
+        serializer = ListBlogForumSerializer(queryset, many=True)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)

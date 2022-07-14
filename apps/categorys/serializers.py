@@ -21,3 +21,4 @@ class CategoryBlogsSerializer(serializers.ModelSerializer):
         post = obj.category.count()
         return post
 
+

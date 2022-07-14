@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import BlogView, BlogDetailView, UpvoteView, DownvoteView, CountBlogView, ListFeaturedView, TagBlog
+from .views import BlogView, BlogDetailView, UpvoteView, DownvoteView, CountBlogView, ListFeaturedView, TagBlog, ListCategoryView,ListTagView
 
 app_name = 'blog_it'
 
@@ -10,6 +10,8 @@ urlpatterns = [
     path('downvote/<int:pk>', DownvoteView.as_view(), name='down_vote'),
     path('featured/', ListFeaturedView.as_view(), name='blog-detail'),
     path('count/', CountBlogView.as_view(), name='count-blog'),
-    path('slug/<str:slug>/', BlogDetailView.as_view(), name='blog-detail'),
+    path('category/<pk>', ListCategoryView.as_view(), name='blog-category'),
+    path('tag/<pk>', ListTagView.as_view(), name='blog-tag'),
 
+    path('slug/<str:slug>/', BlogDetailView.as_view(), name='blog-detail'),
 ]

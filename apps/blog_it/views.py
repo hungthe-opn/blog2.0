@@ -41,7 +41,7 @@ class TagBlog(PaginationAPIView):
 
 
 class BlogDetailView(APIView):
-    def get(self, request,slug):
+    def get(self, request, slug):
         queryset = BlogModel.objects.all().first()
         serializer = BlogDetailSerializer(queryset)
         return Response(custom_response(serializer.data), status=status.HTTP_201_CREATED)
@@ -51,6 +51,7 @@ class BlogDetailView(APIView):
         obj.view_count += 1
         obj.save()
         return obj
+
 
 class ListFeaturedView(APIView):
 
@@ -126,3 +127,25 @@ class CountBlogView(APIView):
 
         }
         )
+
+
+class ListCategoryView(PaginationAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get(self, request, pk):
+        queryset = BlogModel.objects.filter(category_id=pk)
+        serializer = BlogSerializer(queryset, many=True)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)
+
+
+class ListTagView(PaginationAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get(self, request, pk):
+        queryset = BlogModel.objects.filter(tag_id=pk)
+        serializer = BlogSerializer(queryset, many=True)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)

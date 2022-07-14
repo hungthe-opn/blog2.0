@@ -1,14 +1,15 @@
 # from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import RegisterUserSerializer, UpdateInformationSerializer, UserInformationSerializer
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from api.utils import custom_response
 # Create your views here.
-from .models import CreateUserModel
-from api.utils import convert_date_front_to_back, custom_response
+from .models import CreateUserModel, Follow
+from .serializers import RegisterUserSerializer, UpdateInformationSerializer, UserInformationSerializer, \
+    UserFollowSerializer, ViewUserSerializer
 
 
 class CustomUserCreate(APIView):
@@ -89,5 +90,48 @@ class UserInforView(APIView):
     def get(self, request):
         queryset = CreateUserModel.objects.filter(id=request.user.id).first()
         serializer = UserInformationSerializer(queryset)
+        return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
+                        status=status.HTTP_201_CREATED)
+
+
+class UserDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request,pk):
+        queryset = CreateUserModel.objects.filter(id=pk).first()
+        serializer = ViewUserSerializer(queryset)
+        return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
+                        status=status.HTTP_201_CREATED)
+
+
+class UserFollowerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        query = Follow.objects.create(from_user=request.user.id, to_user=request.follow.id, id=pk)
+        serializer = UserFollowSerializer(query)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
+                            status=status.HTTP_201_CREATED)
+        return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
+                                        msg_display='Cập nhật bài viết thuất bại, vui lòng thử lại sau'),
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        queryset = Follow.objects.filter(from_user=request.user.id, to_user=request.follow.id, id=pk)
+        serializer = UserFollowSerializer(queryset)
+        queryset.delete()
+        return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết h công'))
+
+
+class UserFollow(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        queryset = CreateUserModel.objects.get(id=pk)
+        queryset.from_user.all()
+        queryset.to_user.all()
+        serializer = UserFollowSerializer(queryset, many=True)
         return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
                         status=status.HTTP_201_CREATED)

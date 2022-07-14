@@ -1,8 +1,7 @@
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 
 # Create your models here.
@@ -74,11 +73,15 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         super(CreateUserModel, self).save(*args, **kwargs)
         self.name = str(self.rank.encode('unicode_escape'))
-
-
 class Follow(models.Model):
-    from_user = models.ForeignKey(CreateUserModel, related_name='follower', on_delete=models.CASCADE)
-    to_user = models.ForeignKey(CreateUserModel, related_name='follow_target', on_delete=models.CASCADE)
+    from_user = models.ForeignKey("CreateUserModel", related_name='follower', on_delete=models.CASCADE)
+    to_user = models.ForeignKey("CreateUserModel", related_name='follow_target', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    muted = models.BooleanField(default=False)
+    count = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ('from_user', 'to_user')
+
+    def __str__(self) -> str:
+        return f"{self.to_user.user_name} started following {self.from_user.user_name}"
