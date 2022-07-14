@@ -108,7 +108,7 @@ class UserFollowerView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        query = Follow.objects.create(from_user=request.user.id, to_user=request.follow.id, id=pk)
+        query = Follow.objects.create(follow_to=pk)
         serializer = UserFollowSerializer(query)
         if serializer.is_valid():
             serializer.save()

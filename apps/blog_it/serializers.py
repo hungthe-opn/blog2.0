@@ -66,10 +66,11 @@ class BlogDetailSerializer(serializers.ModelSerializer):
     avatar_author = serializers.SerializerMethodField()
     author_email = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
+    author_about = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogModel
-        fields = ['id', 'author_id', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
+        fields = ['id', 'author_id','author_about', 'author_name', 'category_id', 'rank', 'category_name', 'title', 'content', 'slug',
                   'author_email',
                   'avatar_author', 'time_read', 'tags',
                   'image', 'source', 'view_count', 'time_post', 'time_update', 'upvote', 'description', 'featured']
@@ -83,6 +84,9 @@ class BlogDetailSerializer(serializers.ModelSerializer):
 
     def get_author_name(self, obj):
         return obj.author.user_name
+
+    def get_author_about(self, obj):
+        return obj.author.about
 
     def get_rank(self, obj):
         return obj.author.rank

@@ -51,7 +51,7 @@ class SexModel(models.TextChoices):
 
 class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email add'), unique=True)
-    user_name = models.CharField(max_length=150, unique=True,null=True, default='Người mới')
+    user_name = models.CharField(max_length=150, unique=True, null=True, default='Người mới')
     first_name = models.CharField(max_length=150, blank=True)
     start_date = models.DateTimeField(default=timezone.now)
     about = models.TextField(_('about'), max_length=500, blank=True)
@@ -73,15 +73,17 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         super(CreateUserModel, self).save(*args, **kwargs)
         self.name = str(self.rank.encode('unicode_escape'))
+
+
 class Follow(models.Model):
-    from_user = models.ForeignKey("CreateUserModel", related_name='follower', on_delete=models.CASCADE)
-    to_user = models.ForeignKey("CreateUserModel", related_name='follow_target', on_delete=models.CASCADE)
+    follow_to = models.ForeignKey("CreateUserModel", related_name='follower', on_delete=models.CASCADE)
+    follower = models.ForeignKey("CreateUserModel", related_name='follow_target', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     muted = models.BooleanField(default=False)
     count = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ('from_user', 'to_user')
+        unique_together = ('follow_to', 'follower')
 
     def __str__(self) -> str:
         return f"{self.to_user.user_name} started following {self.from_user.user_name}"

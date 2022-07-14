@@ -47,10 +47,10 @@ class AddBlogForum(APIView):
 # list blog in status = 2, admin check =3
 class ListBlogView(PaginationAPIView):
     pagination_class = CustomPagination
-    permission_classes = [IsAdmin]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        queryset = BlogModel.objects.filter(stt=2)
+        queryset = ForumModel.objects.filter(stt=2)
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
@@ -61,7 +61,7 @@ class DetailForumView(PaginationAPIView):
     permission_classes = [IsAdmin]
 
     def get(self, request, pk):
-        queryset = BlogModel.objects.filter(id=pk, stt=2)
+        queryset = ForumModel.objects.filter(id=pk, stt=2)
         serializer = DetailBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
