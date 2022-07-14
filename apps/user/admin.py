@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.forms import TextInput, Textarea, CharField
 from django.db import models
-from .models import CreateUserModel
+from .models import CreateUserModel, Follow
 
 
 # Register your models here.
@@ -33,3 +33,5 @@ class UserAdminConfig(UserAdmin):
 
 
 admin.site.register(CreateUserModel, UserAdminConfig)
+admin.site.register(Follow)
+

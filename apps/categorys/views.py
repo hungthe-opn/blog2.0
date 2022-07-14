@@ -28,3 +28,4 @@ class CategoryDetailView(PaginationAPIView):
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
 
+

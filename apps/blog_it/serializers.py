@@ -108,6 +108,11 @@ class BlogDetailSerializer(serializers.ModelSerializer):
         tag_serializer = TagSerializer(tags, many=True)
         return tag_serializer.data
 
+    def get_view_count(self,obj):
+        obj.view_count +=1
+        obj.save()
+        return obj
+
 
 class UpvoteSerializer(serializers.ModelSerializer):
     class Meta:
