@@ -57,6 +57,7 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     about = models.TextField(_('about'), max_length=500, blank=True)
     rank = models.CharField(max_length=30, choices=RankModel.choices, default=RankModel.Lv1)
     image = models.ImageField(_('image'), max_length=100, null=True, blank=True)
+    home = models.CharField(max_length=256, null=True)
     is_admin = models.BooleanField(default=False)
     is_author = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -66,6 +67,7 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     objects = CusCustomAccountManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['user_name', 'first_name']
+    # follow = models.ManyToManyField(through=)
 
     def __str__(self):
         return self.user_name
@@ -76,14 +78,14 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
 
 
 class Follow(models.Model):
-    follow_to = models.ForeignKey("CreateUserModel", related_name='follower', on_delete=models.CASCADE)
-    follower = models.ForeignKey("CreateUserModel", related_name='follow_target', on_delete=models.CASCADE)
+    from_user = models.ForeignKey("CreateUserModel", related_name='followings', on_delete=models.CASCADE)
+    to_user = models.ForeignKey("CreateUserModel", related_name='followers', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     muted = models.BooleanField(default=False)
     count = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ('follow_to', 'follower')
+        unique_together = ('from_user', 'to_user')
 
     def __str__(self) -> str:
         return f"{self.to_user.user_name} started following {self.from_user.user_name}"

@@ -67,6 +67,7 @@ class BlogDetailSerializer(serializers.ModelSerializer):
     author_email = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     author_about = serializers.SerializerMethodField()
+    view_count = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogModel
@@ -113,9 +114,11 @@ class BlogDetailSerializer(serializers.ModelSerializer):
         return tag_serializer.data
 
     def get_view_count(self,obj):
-        obj.view_count +=1
+        obj.view_count += 1
+        print(obj.view_count)
         obj.save()
-        return obj
+        print(obj.view_count)
+        return obj.view_count
 
 
 class UpvoteSerializer(serializers.ModelSerializer):

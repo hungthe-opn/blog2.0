@@ -12,6 +12,5 @@ urlpatterns = [
     path('count/', CountBlogView.as_view(), name='count-blog'),
     path('category/<pk>', ListCategoryView.as_view(), name='blog-category'),
     path('tag/<pk>', ListTagView.as_view(), name='blog-tag'),
-
     path('slug/<str:slug>/', BlogDetailView.as_view(), name='blog-detail'),
 ]

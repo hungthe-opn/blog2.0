@@ -8,7 +8,7 @@ urlpatterns = [
     path('info/', UserInforView.as_view(), name='user_infor'),
     path('logout/blacklist/', BlacklistTokenView.as_view(), name='blacklist'),
     path('follow/<pk>', UserFollowerView.as_view(), name='follow'),
-    path('get-follow/<pk>', UserFollow.as_view(), name='list-follow'),
+    path('get-follow/', UserFollow.as_view(), name='list-follow'),
     path('get-user/<pk>', UserDetailsView.as_view(), name='list-follow'),
 
 ]

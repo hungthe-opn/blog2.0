@@ -49,15 +49,24 @@ class TokenObtainPairSerializer(TokenObtainSerializer):
 
 
 class UserInformationSerializer(serializers.ModelSerializer):
+    follower_counter = serializers.SerializerMethodField()
+    following_counter = serializers.SerializerMethodField()
+
     class Meta:
         model = CreateUserModel
-        fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image', 'sex']
+        fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image', 'sex',
+                  'follower_counter', 'following_counter']
 
+    def get_follower_counter(self, obj):
+        return obj.followers.count()
+
+    def get_following_counter(self, obj):
+        return obj.followings.count()
 
 class FollowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
-        fields = ['id', 'from_user', 'created']
+        fields = ['to_user', 'from_user', 'created']
 
 
 class FollowersSerializer(serializers.ModelSerializer):
@@ -83,6 +92,23 @@ class UserFollowSerializer(serializers.ModelSerializer):
 
 
 class ViewUserSerializer(serializers.ModelSerializer):
+    follower_counter = serializers.SerializerMethodField()
+    following_counter = serializers.SerializerMethodField()
+    # is_following = serializers.SerializerMethodField()
+
     class Meta:
         model = CreateUserModel
-        fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image', 'sex']
+        fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image', 'sex',
+                  'follower_counter', 'following_counter']
+
+    def get_follower_counter(self, obj):
+        return obj.followers.count()
+
+    def get_following_counter(self, obj):
+        return obj.followings.count()
+
+    # def get_is_following(self, obj):
+    #     following = Follow.objects.filter(from_user=self.context.get('user_id'), to_user=obj.id)
+    #     if following.exists():
+    #         return True
+    #     return False

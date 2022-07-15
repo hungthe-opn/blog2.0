@@ -9,7 +9,7 @@ from api.utils import custom_response
 # Create your views here.
 from .models import CreateUserModel, Follow
 from .serializers import RegisterUserSerializer, UpdateInformationSerializer, UserInformationSerializer, \
-    UserFollowSerializer, ViewUserSerializer
+    ViewUserSerializer, FollowingSerializer
 
 
 class CustomUserCreate(APIView):
@@ -99,8 +99,12 @@ class UserDetailsView(APIView):
 
     def get(self, request,pk):
         queryset = CreateUserModel.objects.filter(id=pk).first()
+        following = Follow.objects.filter(from_user=request.user.id, to_user=pk)
+        is_following = True if following.exists() else False
         serializer = ViewUserSerializer(queryset)
-        return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
+        response = serializer.data
+        response['is_following'] = is_following
+        return Response(custom_response(response, msg_display='Hiển thị thành công'),
                         status=status.HTTP_201_CREATED)
 
 
@@ -108,30 +112,58 @@ class UserFollowerView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        query = Follow.objects.create(follow_to=pk)
-        serializer = UserFollowSerializer(query)
+        data = {
+            'from_user': request.user.id,
+            'to_user': pk
+        }
+        serializer = FollowingSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
+            return Response(custom_response(serializer.data, msg_display='Theo dõi thành công'),
                             status=status.HTTP_201_CREATED)
         return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
-                                        msg_display='Cập nhật bài viết thuất bại, vui lòng thử lại sau'),
+                                        msg_display='Theo dõi thuất bại'),
                         status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        queryset = Follow.objects.filter(from_user=request.user.id, to_user=request.follow.id, id=pk)
-        serializer = UserFollowSerializer(queryset)
-        queryset.delete()
-        return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết h công'))
+        follow = Follow.objects.filter(from_user=request.user.id, to_user=pk).first()
+        if follow is not None:
+            follow.delete()
+            return Response(custom_response({
+                'Xóa theo dõi thành công'
+            }, msg_display='Hiển thị thành công'), status=status.HTTP_201_CREATED)
+        return Response(custom_response({}, list=False, msg_display='Quá trình đã xảy ra lỗi',response_msg='ERROR',))
 
 
 class UserFollow(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        queryset = CreateUserModel.objects.get(id=pk)
-        queryset.from_user.all()
-        queryset.to_user.all()
-        serializer = UserFollowSerializer(queryset, many=True)
-        return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
-                        status=status.HTTP_201_CREATED)
+    def get(self, request):
+        followers = request.user.followers.all()
+        followings = request.user.followings.all()
+        # follower_serializer = ViewUserSerializer(followers, many=True)
+        # following_serializer = ViewUserSerializer(followings, many=True)
+        return Response(custom_response({
+            # 'followers': follower_serializer.data,
+            # 'followings': following_serializer.data
+            'followers': followers.count(),
+            'following': followings.count(),
+        }, msg_display='Hiển thị thành công'),
+            status=status.HTTP_201_CREATED)
+
+
+class InfoFollow(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request,pk):
+        followers = request.user.followers.all()
+        followings = request.user.followings.all()
+        # follower_serializer = ViewUserSerializer(followers, many=True)
+        # following_serializer = ViewUserSerializer(followings, many=True)
+        return Response(custom_response({
+            # 'followers': follower_serializer.data,
+            # 'followings': following_serializer.data
+            'followers': followers.count(),
+            'following': followings.count(),
+        }, msg_display='Hiển thị thành công'),
+            status=status.HTTP_201_CREATED)
