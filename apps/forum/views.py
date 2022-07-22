@@ -10,24 +10,24 @@ from api.permissions import IsAdmin
 from api.utils import custom_response
 # Create your views here.
 from .models import ForumModel
-from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, DetailBlogForumSerializer
-from ..blog_it.models import BlogTagModel, BlogModel
+from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, DetailBlogForumSerializer, \
+    UpvoteForumSerializer
+from ..blog_it.models import BlogTagModel, BlogModel, UpvoteModel
 
 
 class AddBlogForum(APIView):
-    permission_classes = [IsAdmin]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         forms = request.data
         data = {
             'author': request.user.id,
-            'category': forms.get('category'),
             'title': forms.get('title'),
             'content': forms.get('content'),
             'stt': 2,
             'view_count': 0,
             'time_post': datetime.now(),
-            'description': forms.get('description')
+            'description': forms.get('description'),
         }
         tags = forms.get('tags')
         serializer = AddBlogForumSerializer(data=data)
@@ -47,10 +47,9 @@ class AddBlogForum(APIView):
 # list blog in status = 2, admin check =3
 class ListBlogView(PaginationAPIView):
     pagination_class = CustomPagination
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        queryset = ForumModel.objects.filter(stt=2)
+        queryset = ForumModel.objects.filter(stt=3)
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
@@ -58,13 +57,17 @@ class ListBlogView(PaginationAPIView):
 
 class DetailForumView(PaginationAPIView):
     pagination_class = CustomPagination
-    permission_classes = [IsAdmin]
 
     def get(self, request, pk):
-        queryset = ForumModel.objects.filter(id=pk, stt=2)
-        serializer = DetailBlogForumSerializer(queryset, many=True)
-        result = self.paginate_queryset(serializer.data)
-        return self.get_paginated_response(result)
+        queryset = ForumModel.objects.filter(id=pk, stt=3).first()
+        serializer = DetailBlogForumSerializer(queryset)
+        return Response(custom_response(serializer.data), status=status.HTTP_200_OK)
+
+    def get_object(self):
+        obj = super().get_object()
+        obj.view_count += 1
+        obj.save()
+        return obj
 
 
 class ListBlogUserView(PaginationAPIView):
@@ -89,3 +92,55 @@ class InforUser(PaginationAPIView):
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
+
+
+class UpvoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        existing_upvote = UpvoteModel.objects.filter(author_id=request.user.id, forum_id=pk).first()
+        if existing_upvote is not None:
+            if existing_upvote.value == -1:
+                existing_upvote.value = 1
+                existing_upvote.save()
+                return Response({'message': 'downvote to upvote'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'upvoted before'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = {
+                "author": request.user.id,
+                "forum": pk,
+                "value": 1
+            }
+            serializer = UpvoteForumSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
+                                status=status.HTTP_201_CREATED)
+            return Response({'message': 'err'})
+
+
+class DownvoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        existing_upvote = UpvoteModel.objects.filter(author_id=request.user.id, forum_id=pk).first()
+        if existing_upvote is not None:
+            if existing_upvote.value == 1:
+                existing_upvote.value = -1
+                existing_upvote.save()
+                return Response({'message': 'upvote to downvote'})
+            else:
+                return Response({'message': 'downvoted before'})
+        else:
+            data = {
+                "author": request.user.id,
+                "forum": pk,
+                "value": -1
+            }
+            serializer = UpvoteForumSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
+                                status=status.HTTP_201_CREATED)
+            return Response({'message': 'err'})

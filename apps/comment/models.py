@@ -13,7 +13,7 @@ class CommentModel(models.Model):
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    reply_of = models.ForeignKey("CommentModel", on_delete=models.CASCADE, null=True)
+    reply_of = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return 'Comment by {} on {}'.format(self.author, self.forum)

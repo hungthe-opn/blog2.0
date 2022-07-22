@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from api.pagination import CustomPagination, PaginationAPIView
 from api.utils import convert_date_front_to_back, custom_response
 from datetime import date, timedelta
 from django.db.models import Q
-from rest_framework import status
+from rest_framework import status, generics,filters
 from rest_framework.response import Response
 from api.permissions import IsAdmin, IsReport
 
@@ -51,6 +51,16 @@ class BlogDetailView(APIView):
         obj.view_count += 1
         obj.save()
         return obj
+
+
+class PostListDetailFilter(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = BlogModel.objects.all()
+    serializer_class = BlogSerializer
+    pagination_class = CustomPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['^slug']
+
 
 
 class ListFeaturedView(APIView):
