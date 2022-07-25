@@ -88,4 +88,4 @@ class Follow(models.Model):
         unique_together = ('from_user', 'to_user')
 
     def __str__(self) -> str:
-        return f"{self.to_user.user_name} started following {self.from_user.user_name}"
+        return f"{self.from_user.user_name} started following {self.to_user.user_name}"

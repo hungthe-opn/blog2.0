@@ -13,13 +13,13 @@ class ForumModel(models.Model):
     tag = models.ManyToManyField("blog_it.BlogTagModel", related_name="forum_tag")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='forum', on_delete=models.CASCADE)
     title = models.CharField(max_length=250)
-    image = models.ImageField(max_length=100, null=True)
+    image = models.ImageField(max_length=100, null=True, blank=True)
     description = models.TextField()
     content = models.TextField()
     stt = models.IntegerField(default=1)
     view_count = models.IntegerField(default=0)
     featured = models.BooleanField(default=False)
-    notify = models.TextField()
+    notify = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, unique=True)
@@ -49,16 +49,3 @@ class ForumModel(models.Model):
 
     class Meta:
         db_table = 'forum'
-
-# class EmojiModel(models.Model):
-#     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='emoji_author')
-#     forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='forum', null=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#     value = models.IntegerField(default=0)
-#
-#     def __str__(self):
-#         return self.forum.title
-#
-#     class Meta:
-#         db_table = 'emoji'

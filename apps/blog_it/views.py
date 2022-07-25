@@ -62,10 +62,7 @@ class PostListDetailFilter(generics.ListAPIView):
     search_fields = ['^slug']
 
 
-
 class ListFeaturedView(APIView):
-
-    # permission_classes = [IsAdmin]
 
     def get(self, request):
         queryset = BlogModel.objects.filter(featured=True).order_by('-time_post')

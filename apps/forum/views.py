@@ -6,13 +6,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.pagination import CustomPagination, PaginationAPIView
-from api.permissions import IsAdmin
 from api.utils import custom_response
 # Create your views here.
 from .models import ForumModel
 from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, DetailBlogForumSerializer, \
     UpvoteForumSerializer
-from ..blog_it.models import BlogTagModel, BlogModel, UpvoteModel
+from ..blog_it.models import BlogTagModel, UpvoteModel
+from ..user.models import Follow
 
 
 class AddBlogForum(APIView):
@@ -24,7 +24,7 @@ class AddBlogForum(APIView):
             'author': request.user.id,
             'title': forms.get('title'),
             'content': forms.get('content'),
-            'stt': 2,
+            'stt': 3 if request.user.is_admin else 2,
             'view_count': 0,
             'time_post': datetime.now(),
             'description': forms.get('description'),
@@ -49,7 +49,7 @@ class ListBlogView(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request):
-        queryset = ForumModel.objects.filter(stt=3)
+        queryset = ForumModel.objects.filter(stt=3).order_by('-time_post')
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
@@ -76,7 +76,6 @@ class ListBlogUserView(PaginationAPIView):
 
     def get(self, request):
         queryset = ForumModel.objects.filter(id=request.user.id, stt=2)
-        print(queryset)
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
@@ -88,7 +87,6 @@ class InforUser(PaginationAPIView):
 
     def get(self, request, pk):
         queryset = ForumModel.objects.filter(stt=2, author_id=pk)
-        print(queryset)
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
@@ -144,3 +142,41 @@ class DownvoteView(APIView):
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
             return Response({'message': 'err'})
+
+
+class ListForumFollowersView(PaginationAPIView):
+    pagination_class = CustomPagination
+
+    def get(self, request):
+        followings = Follow.objects.filter(from_user=request.user.id)
+        followings_id = list(map(lambda x: x.to_user, followings))
+        queryset = ForumModel.objects.filter(author_id__in=followings_id)
+        serializer = ListBlogForumSerializer(queryset, many=True)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)
+
+
+# class ListForumBookmarksView(PaginationAPIView):
+#     pagination_class = CustomPagination
+#     permission_classes = [IsAuthenticated]
+#
+#     def get(self, request, pk):
+#         queryset = ForumModel.objects.filter(author_id=request.user.id)
+#         serializer = ListBlogForumSerializer(queryset, many=True)
+#         result = self.paginate_queryset(serializer.data)
+#         return self.get_paginated_response(result)
+#
+#     def post(self, request, pk):
+#         bookmarks = ForumModel.objects.filter(author_id=request.user.id, id=pk).first()
+#         data = {
+#             "author": request.user.id,
+#             "forum": "pk",
+#             "bookmarks": True
+#         }
+#         serializer = ListBlogForumSerializer(bookmarks, data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(custom_response(serializer.data, msg_display='Thêm bài viết vào bookmarks thành công!'),
+#                             status=status.HTTP_201_CREATED)
+#         return Response(custom_response(serializer.errors, msg_display='Lỗi không thể thêm bài viết vào bookmarks'),
+#                         status=status.HTTP_400_BAD_REQUEST)
