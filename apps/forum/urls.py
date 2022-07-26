@@ -7,12 +7,13 @@ from .views import AddBlogForum, \
     InforUser, \
     DownvoteView, \
     UpvoteView, \
-    ListForumFollowersView
+    ListForumFollowersView,ListBlogViewCount
 
 app_name = 'forum'
 
 urlpatterns = [
     path('', AddBlogForum.as_view(), name='add-post'),
+    path('list-view-count/', ListBlogViewCount.as_view(), name='view-count'),
     path('list-blog/', ListBlogView.as_view(), name='list-blog'),
     path('detail-forum/<pk>', DetailForumView.as_view(), name='detail-forum/'),
     path('user-blog/', ListBlogUserView.as_view(), name='user-blog'),

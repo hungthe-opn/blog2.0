@@ -106,9 +106,3 @@ class ViewUserSerializer(serializers.ModelSerializer):
 
     def get_following_counter(self, obj):
         return obj.followings.count()
-
-    # def get_is_following(self, obj):
-    #     following = Follow.objects.filter(from_user=self.context.get('user_id'), to_user=obj.id)
-    #     if following.exists():
-    #         return True
-    #     return False

@@ -65,9 +65,9 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     is_report = models.BooleanField(default=False)
     sex = models.CharField(max_length=30, choices=SexModel.choices, default=SexModel.Male)
     objects = CusCustomAccountManager()
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['user_name', 'first_name']
-    # follow = models.ManyToManyField(through=)
 
     def __str__(self):
         return self.user_name

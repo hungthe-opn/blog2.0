@@ -6,6 +6,7 @@ from django.template.defaultfilters import slugify
 
 # Create your models here.
 from apps.categorys.models import CategoryModel
+from apps.comment.models import CommentModel
 from apps.forum.models import ForumModel
 
 
@@ -126,6 +127,7 @@ class UpvoteModel(models.Model):
     blog = models.ForeignKey(BlogModel, on_delete=models.CASCADE, related_name='blog', null=True)
     series = models.ForeignKey(SeriesModel, on_delete=models.CASCADE, related_name='upvote_series', null=True)
     forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='forum_upvote', null=True)
+    comment = models.ForeignKey(CommentModel, on_delete=models.CASCADE, related_name='comment_forum',null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     value = models.IntegerField(default=1)

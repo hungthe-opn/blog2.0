@@ -76,7 +76,7 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
                   'slug',
                   'image', 'view_count', 'time_post', 'description', 'featured',
                   'author_email', 'upvote',
-                  'avatar_author']
+                  'avatar_author', 'created_at','updated_at']
 
     def get_author_id(self, obj):
         return obj.author_id
@@ -114,4 +114,4 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
 class UpvoteForumSerializer(serializers.ModelSerializer):
     class Meta:
         model = UpvoteModel
-        fields = ('id', 'author', 'forum', 'series', 'value')
+        fields = ('id', 'author', 'forum', 'series', 'value', 'comment')

@@ -55,6 +55,16 @@ class ListBlogView(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
+class ListBlogViewCount(PaginationAPIView):
+    pagination_class = CustomPagination
+
+    def get(self, request):
+        queryset = ForumModel.objects.filter(stt=3).order_by('-view_count')
+        serializer = ListBlogForumSerializer(queryset, many=True)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)
+
+
 class DetailForumView(PaginationAPIView):
     pagination_class = CustomPagination
 
@@ -154,29 +164,3 @@ class ListForumFollowersView(PaginationAPIView):
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
-
-
-# class ListForumBookmarksView(PaginationAPIView):
-#     pagination_class = CustomPagination
-#     permission_classes = [IsAuthenticated]
-#
-#     def get(self, request, pk):
-#         queryset = ForumModel.objects.filter(author_id=request.user.id)
-#         serializer = ListBlogForumSerializer(queryset, many=True)
-#         result = self.paginate_queryset(serializer.data)
-#         return self.get_paginated_response(result)
-#
-#     def post(self, request, pk):
-#         bookmarks = ForumModel.objects.filter(author_id=request.user.id, id=pk).first()
-#         data = {
-#             "author": request.user.id,
-#             "forum": "pk",
-#             "bookmarks": True
-#         }
-#         serializer = ListBlogForumSerializer(bookmarks, data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(custom_response(serializer.data, msg_display='Thêm bài viết vào bookmarks thành công!'),
-#                             status=status.HTTP_201_CREATED)
-#         return Response(custom_response(serializer.errors, msg_display='Lỗi không thể thêm bài viết vào bookmarks'),
-#                         status=status.HTTP_400_BAD_REQUEST)
