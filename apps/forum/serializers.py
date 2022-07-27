@@ -69,13 +69,14 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
     author_email = serializers.SerializerMethodField()
     upvote = serializers.SerializerMethodField()
     view_count = serializers.SerializerMethodField()
+    quantity_comments = serializers.SerializerMethodField()
 
     class Meta:
         model = ForumModel
         fields = ['id', 'tags', 'author_id', 'author_name', 'rank', 'title', 'content',
                   'slug',
                   'image', 'view_count', 'time_post', 'description', 'featured',
-                  'author_email', 'upvote',
+                  'author_email', 'upvote', 'quantity_comments',
                   'avatar_author', 'created_at','updated_at']
 
     def get_author_id(self, obj):
@@ -109,6 +110,10 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
         obj.view_count += 1
         obj.save()
         return obj.view_count
+
+    def get_quantity_comments(self,obj):
+        quantity = obj.forum.filter(reply_of=None).count()
+        return quantity
 
 
 class UpvoteForumSerializer(serializers.ModelSerializer):

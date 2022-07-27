@@ -133,7 +133,12 @@ class UpvoteModel(models.Model):
     value = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.blog.title
+        if self.blog is not None:
+            return self.blog.title
+        elif self.forum is not None:
+            return self.forum.title
+        else:
+            return self.comment.forum.title
 
     class Meta:
         db_table = 'upvote'

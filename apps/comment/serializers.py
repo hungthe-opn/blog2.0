@@ -46,10 +46,12 @@ class ListCommentSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     rank = serializers.SerializerMethodField()
     avatar_author = serializers.SerializerMethodField()
+    quantity_upvote = serializers.SerializerMethodField()
 
     class Meta:
         model = CommentModel
         fields = ['id', 'author', 'forum', 'icon', 'body', 'active', 'created_at', 'updated_at', 'reply_of',
+                  'quantity_upvote',
                   'author_id', 'author_name', 'rank', 'avatar_author']
 
     def get_author_id(self, obj):
@@ -63,3 +65,10 @@ class ListCommentSerializer(serializers.ModelSerializer):
 
     def get_avatar_author(self, obj):
         return obj.author.image.url
+
+    def get_quantity_upvote(self, obj):
+        upvote_list = obj.comment_forum.all()
+        counter = 0
+        for upvote in upvote_list:
+            counter += upvote.value
+        return counter
