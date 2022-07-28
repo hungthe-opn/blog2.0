@@ -7,7 +7,9 @@ from .views import AddBlogForum, \
     InforUser, \
     DownvoteView, \
     UpvoteView, \
-    ListForumFollowersView,ListBlogViewCount
+    ListForumFollowersView, ListBlogViewCount, \
+    BookmarksPostView,\
+ListBookmarksPostView
 
 app_name = 'forum'
 
@@ -21,4 +23,7 @@ urlpatterns = [
     path('upvote-forum/<pk>', UpvoteView.as_view(), name='upvote'),
     path('downvote-forum/<pk>', DownvoteView.as_view(), name='down-vote'),
     path('list-followers/', ListForumFollowersView.as_view(), name='followers'),
+    path('post-bookmark/<pk>', BookmarksPostView.as_view(), name='post-bookmark'),
+    path('user-get-bookmark/', ListBookmarksPostView.as_view(), name='post-user-bookmarks'),
+
 ]

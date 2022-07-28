@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import *
-from ..blog_it.models import UpvoteModel
+from ..blog_it.models import UpvoteModel, Bookmarks
 from ..blog_it.serializers import TagSerializer
 
 
@@ -111,7 +111,7 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
         obj.save()
         return obj.view_count
 
-    def get_quantity_comments(self,obj):
+    def get_quantity_comments(self, obj):
         quantity = obj.forum.filter(reply_of=None).count()
         return quantity
 
@@ -120,3 +120,9 @@ class UpvoteForumSerializer(serializers.ModelSerializer):
     class Meta:
         model = UpvoteModel
         fields = ('id', 'author', 'forum', 'series', 'value', 'comment')
+
+
+class CheckStatusBookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmarks
+        fields = ['id', 'author', 'forum', 'created_at', 'updated_at', 'count']

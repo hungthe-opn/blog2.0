@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from apps.comment.models import CommentModel
 
 
@@ -72,3 +71,5 @@ class ListCommentSerializer(serializers.ModelSerializer):
         for upvote in upvote_list:
             counter += upvote.value
         return counter
+
+

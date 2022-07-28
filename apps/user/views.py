@@ -56,7 +56,6 @@ class UpdateInformationView(APIView):
         }
         user_name = CreateUserModel.objects.filter(user_name=forms.get('user_name')).exclude(id=request.user.id)
         if len(user_name) != 0:
-            print(1111111111111111111)
             return Response({'message': 'Tên đăng nhập đã tồn tại, vui lòng thử lại!'},
                             status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -141,11 +140,7 @@ class UserFollow(APIView):
     def get(self, request):
         followers = request.user.followers.all()
         followings = request.user.followings.all()
-        # follower_serializer = ViewUserSerializer(followers, many=True)
-        # following_serializer = ViewUserSerializer(followings, many=True)
         return Response(custom_response({
-            # 'followers': follower_serializer.data,
-            # 'followings': following_serializer.data
             'followers': followers.count(),
             'following': followings.count(),
         }, msg_display='Hiển thị thành công'),

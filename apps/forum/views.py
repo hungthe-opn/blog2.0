@@ -11,7 +11,8 @@ from api.utils import custom_response
 from .models import ForumModel
 from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, DetailBlogForumSerializer, \
     UpvoteForumSerializer
-from ..blog_it.models import BlogTagModel, UpvoteModel
+from ..blog_it.models import BlogTagModel, UpvoteModel, Bookmarks
+from ..blog_it.serializers import BookmarksSerializer, UserBookmarksSerializer
 from ..user.models import Follow
 
 
@@ -70,8 +71,13 @@ class DetailForumView(PaginationAPIView):
 
     def get(self, request, pk):
         queryset = ForumModel.objects.filter(id=pk, stt=3).first()
+        bookmarks = Bookmarks.objects.filter(user=request.user.id, forum=pk)
+        print('Debug', bookmarks)
+        is_bookmarks = True if bookmarks.exists() else False
         serializer = DetailBlogForumSerializer(queryset)
-        return Response(custom_response(serializer.data), status=status.HTTP_200_OK)
+        response = serializer.data
+        response['is_bookmarks'] = is_bookmarks
+        return Response(custom_response(response), status=status.HTTP_200_OK)
 
     def get_object(self):
         obj = super().get_object()
@@ -164,3 +170,43 @@ class ListForumFollowersView(PaginationAPIView):
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
+
+
+class ListBookmarksPostView(PaginationAPIView):
+    pagination_class = CustomPagination
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        queryset = Bookmarks.objects.filter(user=request.user.id)
+        print(queryset)
+        serializer = UserBookmarksSerializer(queryset)
+        result = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(result)
+
+
+class BookmarksPostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        data = {
+            'user': request.user.id,
+            'forum': pk,
+        }
+        serializer = BookmarksSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                custom_response(serializer.data, msg_display='Đã thêm bookmarks bài viết từ forum thành công !'),
+                status=status.HTTP_201_CREATED)
+        return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
+                                        msg_display='Thêm thuất bại'),
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        bookmarks = Bookmarks.objects.filter(user=request.user.id, forum=pk).first()
+        if bookmarks is not None:
+            bookmarks.delete()
+            return Response(custom_response({
+                'Xóa bookmarks bài viết thành công'
+            }, msg_display='Hiển thị thành công'), status=status.HTTP_200_OK)
+        return Response(custom_response({}, list=False, msg_display='Quá trình đã xảy ra lỗi', response_msg='ERROR', ))

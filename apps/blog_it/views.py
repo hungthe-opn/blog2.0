@@ -12,7 +12,8 @@ from api.permissions import IsAdmin, IsReport
 
 # Create your views here.
 from apps.blog_it.models import BlogModel, UpvoteModel, BlogTagModel
-from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, UpvoteSerializer, TagSerializer
+from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, UpvoteSerializer, TagSerializer, \
+    BookmarksSerializer
 
 
 class BlogView(PaginationAPIView):
@@ -156,3 +157,31 @@ class ListTagView(PaginationAPIView):
         serializer = BlogSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
+
+
+# class Bookmarks(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def post(self, request, pk):
+#         data = {
+#             'user': request.user.id,
+#             'forum': pk,
+#         }
+#         serializer = BookmarksSerializer(data=data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(custom_response(serializer.data, msg_display='Đã thêm bookmarks bài viết từ forum thành công !'),
+#                             status=status.HTTP_201_CREATED)
+#         return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
+#                                         msg_display='Thêm thuất bại'),
+#                         status=status.HTTP_400_BAD_REQUEST)
+#
+#     def delete(self, request, pk):
+#         bookmarks = Bookmarks.objects.filter(user=request.user.id, forum=pk).first()
+#         if bookmarks is not None:
+#             bookmarks.delete()
+#             return Response(custom_response({
+#                 'Xóa bookmarks bài viết thành công'
+#             }, msg_display='Hiển thị thành công'), status=status.HTTP_200_OK)
+#         return Response(custom_response({}, list=False, msg_display='Quá trình đã xảy ra lỗi', response_msg='ERROR', ))
+#

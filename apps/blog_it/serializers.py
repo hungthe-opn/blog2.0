@@ -141,3 +141,15 @@ class QuantityBlogSerializer(serializers.ModelSerializer):
 
     def get_category_name(self, obj):
         return obj.category.name
+
+
+class BookmarksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmarks
+        fields = ['user', 'forum', 'created_at', 'updated_at']
+
+
+class UserBookmarksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmarks
+        fields = ['id', 'user', 'forum', 'created_at', 'updated_at']
