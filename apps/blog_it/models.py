@@ -124,10 +124,10 @@ class SeriesBlogModel(models.Model):
 
 class UpvoteModel(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='upvote_author')
-    blog = models.ForeignKey(BlogModel, on_delete=models.CASCADE, related_name='blog', null=True)
-    series = models.ForeignKey(SeriesModel, on_delete=models.CASCADE, related_name='upvote_series', null=True)
-    forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='forum_upvote', null=True)
-    comment = models.ForeignKey(CommentModel, on_delete=models.CASCADE, related_name='comment_forum',null=True)
+    blog = models.ForeignKey(BlogModel, on_delete=models.CASCADE, related_name='blog', null=True, blank=True)
+    series = models.ForeignKey(SeriesModel, on_delete=models.CASCADE, related_name='upvote_series', null=True, blank=True)
+    forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='forum_upvote', null=True, blank=True)
+    comment = models.ForeignKey(CommentModel, on_delete=models.CASCADE, related_name='comment_forum',null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     value = models.IntegerField(default=1)

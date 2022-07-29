@@ -72,18 +72,20 @@ class DetailForumView(PaginationAPIView):
     def get(self, request, pk):
         queryset = ForumModel.objects.filter(id=pk, stt=3).first()
         bookmarks = Bookmarks.objects.filter(user=request.user.id, forum=pk)
-        print('Debug', bookmarks)
+        upvote = UpvoteModel.objects.filter(author=request.user, forum=pk).first()
+        if upvote is not None:
+            if upvote.value == 1:
+                is_upvote = 'upvote'
+            else:
+                is_upvote = 'downvote'
+        else:
+            is_upvote = ''
         is_bookmarks = True if bookmarks.exists() else False
         serializer = DetailBlogForumSerializer(queryset)
         response = serializer.data
         response['is_bookmarks'] = is_bookmarks
+        response['is_upvote'] = is_upvote
         return Response(custom_response(response), status=status.HTTP_200_OK)
-
-    def get_object(self):
-        obj = super().get_object()
-        obj.view_count += 1
-        obj.save()
-        return obj
 
 
 class ListBlogUserView(PaginationAPIView):
@@ -133,6 +135,12 @@ class UpvoteView(APIView):
                                 status=status.HTTP_201_CREATED)
             return Response({'message': 'err'})
 
+    def delete(self, request, pk):
+        delete_upvote = UpvoteModel.objects.filter(forum_id=pk, author_id=request.user.id)
+        serializer = UpvoteForumSerializer(delete_upvote, partial=True, many=True)
+        delete_upvote.delete()
+        return Response(custom_response(serializer.data, list=False, msg_display='Hủy Upvote thành công'))
+
 
 class DownvoteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -158,6 +166,12 @@ class DownvoteView(APIView):
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
             return Response({'message': 'err'})
+
+    def delete(self, request, pk):
+        delete_upvote = UpvoteModel.objects.filter(forum_id=pk, author_id=request.user.id)
+        serializer = UpvoteForumSerializer(delete_upvote, partial=True, many=True)
+        delete_upvote.delete()
+        return Response(custom_response(serializer.data, list=False, msg_display='Hủy Downvote thành công'))
 
 
 class ListForumFollowersView(PaginationAPIView):

@@ -36,10 +36,11 @@ class CusCustomAccountManager(BaseUserManager):
 class RankModel(models.TextChoices):
     Lv1 = 'Thành viên mới'
     Lv2 = 'Người dùng'
-    Lv3 = 'Người dùng nổi bật'
+    Lv3 = 'Tác giả'
     Lv4 = 'Fan cứng'
     Lv5 = 'Người có tầm ảnh hưởng'
-    Lv6 = 'Quản trị viên'
+    Lv6 = 'Chuyên gia bình luận'
+    Lv7 = 'Quản trị viên'
 
 
 class SexModel(models.TextChoices):

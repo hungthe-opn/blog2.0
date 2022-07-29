@@ -13,7 +13,7 @@ class ForumModel(models.Model):
     tag = models.ManyToManyField("blog_it.BlogTagModel", related_name="forum_tag")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='forum', on_delete=models.CASCADE)
     title = models.CharField(max_length=250)
-    image = models.ImageField(max_length=100, null=True, blank=True)
+    image = models.ImageField(max_length=100, null=True)
     description = models.TextField()
     content = models.TextField()
     stt = models.IntegerField(default=1)
@@ -23,7 +23,7 @@ class ForumModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, unique=True)
-    time_post = models.DateTimeField(default=datetime.now, blank=True)
+    time_edit = models.DateTimeField(default=datetime.now, blank=True)
 
     def save(self, *args, **kwargs):
 

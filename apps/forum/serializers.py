@@ -9,7 +9,7 @@ class AddBlogForumSerializer(serializers.ModelSerializer):
     class Meta:
         model = ForumModel
         fields = ['author', 'title', 'image', 'description', 'content', 'stt', 'view_count',
-                  'time_post', 'slug']
+                  'time_edit', 'slug']
 
 
 class ListBlogForumSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class ListBlogForumSerializer(serializers.ModelSerializer):
         model = ForumModel
         fields = ['id', 'tags', 'author_id', 'author_name', 'rank', 'title', 'content',
                   'slug', 'upvote', 'comment',
-                  'image', 'view_count', 'time_post', 'description', 'featured',
+                  'image', 'view_count', 'time_edit', 'description', 'featured',
                   'author_email',
                   'avatar_author', 'created_at']
 
@@ -75,7 +75,7 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
         model = ForumModel
         fields = ['id', 'tags', 'author_id', 'author_name', 'rank', 'title', 'content',
                   'slug',
-                  'image', 'view_count', 'time_post', 'description', 'featured',
+                  'image', 'view_count', 'time_edit', 'description', 'featured',
                   'author_email', 'upvote', 'quantity_comments',
                   'avatar_author', 'created_at','updated_at']
 

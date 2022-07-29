@@ -50,7 +50,7 @@ class ListCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentModel
         fields = ['id', 'author', 'forum', 'icon', 'body', 'active', 'created_at', 'updated_at', 'reply_of',
-                  'quantity_upvote',
+                  'quantity_upvote', 'time_edit',
                   'author_id', 'author_name', 'rank', 'avatar_author']
 
     def get_author_id(self, obj):

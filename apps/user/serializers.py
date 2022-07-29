@@ -5,6 +5,9 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CreateUserModel, Follow
+from ..blog_it.models import UpvoteModel, Bookmarks
+from ..comment.models import CommentModel
+from ..forum.models import ForumModel
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -51,17 +54,47 @@ class TokenObtainPairSerializer(TokenObtainSerializer):
 class UserInformationSerializer(serializers.ModelSerializer):
     follower_counter = serializers.SerializerMethodField()
     following_counter = serializers.SerializerMethodField()
+    quantity_comments = serializers.SerializerMethodField()
+    points = serializers.SerializerMethodField()
+    reputation = serializers.SerializerMethodField()
 
     class Meta:
         model = CreateUserModel
         fields = ['id', 'email', 'user_name', 'first_name', 'start_date', 'about', 'rank', 'image', 'sex',
-                  'follower_counter', 'following_counter']
+                  'follower_counter', 'following_counter', 'quantity_comments', 'points', 'reputation']
 
     def get_follower_counter(self, obj):
         return obj.followers.count()
 
     def get_following_counter(self, obj):
         return obj.followings.count()
+
+    def get_quantity_comments(self, obj):
+        quantity = obj.comment.all().count()
+        return quantity
+
+    def get_points(self, obj):
+        comment_counter = CommentModel.objects.filter(author=obj).count()
+        print(comment_counter)
+        post_counter = ForumModel.objects.filter(author=obj).count()
+        print(post_counter)
+
+        forum_upvotes = UpvoteModel.objects.filter(forum__author=obj)
+        forum_bookmarks = Bookmarks.objects.filter(forum__author=obj)
+        print(forum_bookmarks)
+        blog_upvotes = UpvoteModel.objects.filter(blog__author=obj)
+        forum_upvote_counter = sum(list(map(lambda upvote: upvote.value, forum_upvotes)))
+        forum_bookmarks_couter = sum(list(map(lambda bookmark: bookmark.count, forum_bookmarks)))
+        print(forum_bookmarks_couter)
+        blog_upvote_counter = sum(list(map(lambda upvote: upvote.value, blog_upvotes)))
+        return comment_counter * 1 + post_counter * 2 + forum_upvote_counter * 1 + blog_upvote_counter * 1 + forum_bookmarks_couter * 0.5
+
+    def get_reputation(self, obj):
+        followers_counter = obj.followers.count()
+        forum_upvotes = UpvoteModel.objects.filter(forum__author=obj)
+        forum_upvote_counter = sum(list(map(lambda upvote: upvote.value, forum_upvotes)))
+        return followers_counter * 2 + forum_upvote_counter * 1
+
 
 class FollowingSerializer(serializers.ModelSerializer):
     class Meta:

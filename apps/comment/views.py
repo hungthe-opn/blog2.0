@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from datetime import date
+from datetime import datetime
 
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -49,9 +50,9 @@ class CommentBlogView(PaginationAPIView):
     def patch(self, request, pk):
         queryset = CommentModel.objects.filter(id=pk, author_id=request.user.id).first()
         forms = request.data
-
         data = {
             'body': comment_filter(forms.get('body')),
+            'time_edit': datetime.now()
         }
         serializer = ListCommentSerializer(queryset, data=data, partial=True)
         if serializer.is_valid():

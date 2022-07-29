@@ -95,6 +95,9 @@ class UpvoteView(APIView):
             return Response({'message': 'err'})
 
 
+
+
+
 class DownvoteView(APIView):
     def post(self, request, pk):
         existing_upvote = UpvoteModel.objects.filter(author_id=request.user.id, blog_id=pk).first()

@@ -1,6 +1,7 @@
 # Create your models here.
 from django.conf import settings
 from django.db import models
+from datetime import datetime
 
 from apps.forum.models import ForumModel
 
@@ -13,6 +14,7 @@ class CommentModel(models.Model):
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    time_edit = models.DateTimeField(default=datetime.now, blank=True)
     reply_of = models.IntegerField(null=True, blank=True)
 
     def __str__(self):

@@ -109,6 +109,7 @@ class UpdateInsuranceView(APIView):
             'slug': request.data.get('slug'),
             'content': request.data.get('content'),
             'source': request.data.get('source'),
+            'time_update':datetime.now()
         }
         serializer = EditBlogSerializer(queryset, data=data, partial=True)
         if serializer.is_valid():

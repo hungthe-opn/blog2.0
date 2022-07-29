@@ -1,7 +1,7 @@
 import datetime
 import os
-from urllib.parse import urlparse, urljoin
 from datetime import timedelta
+from urllib.parse import urlparse, urljoin
 
 from corsheaders.defaults import default_headers
 
@@ -197,8 +197,8 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_SCHEMA_CLASS": "api.openapi.AutoSchema",
-'DATETIME_INPUT_FORMATS': '%Y-%m-%d %H:%M:%S',
-
+    # 'DATETIME_INPUT_FORMATS': '%Y-%m-%d %H:%M:%S',
+    "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
 }
 
 JWT_AUTH = {
