@@ -115,9 +115,7 @@ class BlogDetailSerializer(serializers.ModelSerializer):
 
     def get_view_count(self,obj):
         obj.view_count += 1
-        print(obj.view_count)
         obj.save()
-        print(obj.view_count)
         return obj.view_count
 
 

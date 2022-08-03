@@ -1,23 +1,25 @@
 from django.urls import path
 
 from .views import AddBlogForum, \
-    ListBlogView, \
+    PostView, \
     DetailForumView, \
     ListBlogUserView, \
     InforUser, \
     DownvoteView, \
     UpvoteView, \
     ListForumFollowersView, ListBlogViewCount, \
-    BookmarksPostView,\
-ListBookmarksPostView
+    BookmarksPostView, \
+    ListBookmarksPostView, \
+    EditPostView
 
 app_name = 'forum'
 
 urlpatterns = [
     path('', AddBlogForum.as_view(), name='add-post'),
     path('list-view-count/', ListBlogViewCount.as_view(), name='view-count'),
-    path('list-blog/', ListBlogView.as_view(), name='list-blog'),
-    path('detail-forum/<pk>', DetailForumView.as_view(), name='detail-forum/'),
+    path('list-blog/', PostView.as_view(), name='list-blog'),
+    path('detail-forum/<pk>', DetailForumView.as_view(), name='detail-forum'),
+    path('edit-forum/<pk>', EditPostView.as_view(), name='edit-forum'),
     path('user-blog/', ListBlogUserView.as_view(), name='user-blog'),
     path('account-blog/<pk>', InforUser.as_view(), name='account-blog/'),
     path('upvote-forum/<pk>', UpvoteView.as_view(), name='upvote'),

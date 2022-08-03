@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from profanity import comment_filter
 
 from api.pagination import CustomPagination, PaginationAPIView
+from api.permissions import IsAdmin
 from api.utils import custom_response
 # Create your views here.
 from .models import ForumModel
@@ -46,11 +48,11 @@ class AddBlogForum(APIView):
 
 
 # list blog in status = 2, admin check =3
-class ListBlogView(PaginationAPIView):
+class PostView(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request):
-        queryset = ForumModel.objects.filter(stt=3).order_by('-time_post')
+        queryset = ForumModel.objects.filter(stt=3).order_by('-time_edit')
         serializer = ListBlogForumSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
@@ -86,6 +88,35 @@ class DetailForumView(PaginationAPIView):
         response['is_bookmarks'] = is_bookmarks
         response['is_upvote'] = is_upvote
         return Response(custom_response(response), status=status.HTTP_200_OK)
+
+
+class EditPostView(APIView):
+    permission_classes = [IsAuthenticated | IsAdmin]
+
+    def patch(self, request, pk):
+        queryset = ForumModel.objects.filter(id=pk).first()
+        forms = request.data
+        data = {
+            'author': request.user.id,
+            'title': forms.get('title'),
+            'content': comment_filter(forms.get('content')),
+            'time_edit': datetime.now(),
+            'description': comment_filter(forms.get('description')),
+        }
+        serializer = DetailBlogForumSerializer(queryset, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(custom_response(serializer.data, msg_display='Chỉnh sửa bài viết thành công!'),
+                            status=status.HTTP_201_CREATED)
+        return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
+                                        msg_display='Chỉnh sửa thuất bại. Vui lòng kiểm tra lại!'),
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        queryset = ForumModel.objects.filter(id=pk)
+        serializer = DetailBlogForumSerializer(queryset, many=True)
+        queryset.delete()
+        return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
 
 
 class ListBlogUserView(PaginationAPIView):

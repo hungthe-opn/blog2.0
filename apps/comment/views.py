@@ -38,7 +38,9 @@ class CommentBlogView(PaginationAPIView):
             'icon': forms.get('icon'),
             'body': comment_filter(forms.get('body')),
         }
+
         serializer = CommentSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(custom_response(serializer.data, msg_display='Thêm bình luận thành công!'),
@@ -61,12 +63,12 @@ class CommentBlogView(PaginationAPIView):
                 custom_response(serializer.data, msg_display='Chỉnh sửa thành công.'),
                 status=status.HTTP_201_CREATED)
         return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
-                                        msg_display='Chỉnh sửa thành công'),
+                                        msg_display='Chỉnh sửa không thành công'),
                         status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         queryset = CommentModel.objects.filter(id=pk, author_id=request.user.id)
-        serializer = RepCommentSerializer(queryset, partial=True, many=True)
+        serializer = RepCommentSerializer(queryset, many=True)
         queryset.delete()
         return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
 

@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import *
 from ..blog_it.models import UpvoteModel, Bookmarks
 from ..blog_it.serializers import TagSerializer
+from ..comment.models import CommentModel
 
 
 class AddBlogForumSerializer(serializers.ModelSerializer):
@@ -70,14 +71,19 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
     upvote = serializers.SerializerMethodField()
     view_count = serializers.SerializerMethodField()
     quantity_comments = serializers.SerializerMethodField()
+    points = serializers.SerializerMethodField()
+    reputation = serializers.SerializerMethodField()
+    follower_counter = serializers.SerializerMethodField()
+    count_reply = serializers.SerializerMethodField()
 
     class Meta:
         model = ForumModel
         fields = ['id', 'tags', 'author_id', 'author_name', 'rank', 'title', 'content',
                   'slug',
                   'image', 'view_count', 'time_edit', 'description', 'featured',
-                  'author_email', 'upvote', 'quantity_comments',
-                  'avatar_author', 'created_at','updated_at']
+                  'author_email', 'upvote', 'quantity_comments', 'points',
+                  'reputation', 'follower_counter', 'count_reply',
+                  'avatar_author', 'created_at', 'time_edit']
 
     def get_author_id(self, obj):
         return obj.author_id
@@ -106,7 +112,7 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
         tag_serializer = TagSerializer(tags, many=True)
         return tag_serializer.data
 
-    def get_view_count(self,obj):
+    def get_view_count(self, obj):
         obj.view_count += 1
         obj.save()
         return obj.view_count
@@ -114,6 +120,29 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
     def get_quantity_comments(self, obj):
         quantity = obj.forum.filter(reply_of=None).count()
         return quantity
+
+    def get_follower_counter(self, obj):
+        return obj.author.followers.count()
+
+    def get_points(self, obj):
+        comment_counter = CommentModel.objects.filter(author=obj.author_id).count()
+        post_counter = ForumModel.objects.filter(author=obj.author_id).count()
+        forum_upvotes = UpvoteModel.objects.filter(forum__author=obj.author_id)
+        forum_bookmarks = Bookmarks.objects.filter(forum__author=obj.author_id)
+        blog_upvotes = UpvoteModel.objects.filter(blog__author=obj.author_id)
+        forum_upvote_counter = sum(list(map(lambda upvote: upvote.value, forum_upvotes)))
+        forum_bookmarks_couter = sum(list(map(lambda bookmark: bookmark.count, forum_bookmarks)))
+        blog_upvote_counter = sum(list(map(lambda upvote: upvote.value, blog_upvotes)))
+        return comment_counter * 1 + post_counter * 2 + forum_upvote_counter * 1 + blog_upvote_counter * 1 + forum_bookmarks_couter * 0.5
+
+    def get_reputation(self, obj):
+        followers_counter = obj.author.followers.count()
+        forum_upvotes = UpvoteModel.objects.filter(forum__author=obj.author_id)
+        forum_upvote_counter = sum(list(map(lambda upvote: upvote.value, forum_upvotes)))
+        return followers_counter * 2 + forum_upvote_counter * 1
+
+    def get_count_reply(self, obj):
+        forum_upvote = CommentModel.objects.filter(reply_of=obj)
 
 
 class UpvoteForumSerializer(serializers.ModelSerializer):

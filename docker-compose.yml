@@ -1,6 +1,17 @@
 version: "3.9"
 
 services:
+
+  redis-server:
+    image: redis:6.2-alpine
+    restart: always
+    volumes:
+      - ./redis-server:/data/redis
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - '6379:6379'
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+
   db:
     image: mysql:5.7.38-oracle
     container_name: docker_blogs

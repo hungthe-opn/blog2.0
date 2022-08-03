@@ -20,8 +20,6 @@ class BlogView(PaginationAPIView):
     pagination_class = CustomPagination
     lookup_field = 'slug'
 
-    # permission_classes = [IsAdmin]
-
     def get(self, request):
         queryset = BlogModel.objects.all().order_by('-time_post')
         serializer = BlogSerializer(queryset, many=True)
@@ -32,8 +30,6 @@ class BlogView(PaginationAPIView):
 class TagBlog(PaginationAPIView):
     pagination_class = CustomPagination
 
-    # permission_classes = [IsAdmin]
-
     def get(self, request):
         queryset = BlogTagModel.objects.all()
         serializer = TagSerializer(queryset, many=True)
@@ -42,16 +38,11 @@ class TagBlog(PaginationAPIView):
 
 
 class BlogDetailView(APIView):
+
     def get(self, request, slug):
         queryset = BlogModel.objects.get(slug=slug)
         serializer = BlogDetailSerializer(queryset)
-        return Response(custom_response(serializer.data), status=status.HTTP_201_CREATED)
-
-    def get_object(self):
-        obj = super().get_object()
-        obj.view_count += 1
-        obj.save()
-        return obj
+        return Response(custom_response(serializer.data, msg_display='Hiển thị bài viết thành công!'), status=status.HTTP_200_OK)
 
 
 class PostListDetailFilter(generics.ListAPIView):
@@ -68,7 +59,7 @@ class ListFeaturedView(APIView):
     def get(self, request):
         queryset = BlogModel.objects.filter(featured=True).order_by('-time_post')
         serializer = BlogSerializer(queryset, many=True)
-        return Response(custom_response(serializer.data), status=status.HTTP_200_OK)
+        return Response(custom_response(serializer.data, msg_display='Hiển thị thành công!'), status=status.HTTP_200_OK)
 
 
 class UpvoteView(APIView):
@@ -93,9 +84,6 @@ class UpvoteView(APIView):
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
             return Response({'message': 'err'})
-
-
-
 
 
 class DownvoteView(APIView):
@@ -128,14 +116,12 @@ class CountBlogView(APIView):
     def get(self, request):
         blogs = BlogModel.objects.filter(author_id=request.user.id)
         total_blogs = blogs.count()
-
         total_views = sum(list(map(lambda blog: blog.view_count, blogs)))
         return Response({
             'data': {
                 'total_views': total_views,
                 'total_blogs': total_blogs,
             }
-
         }
         )
 
@@ -160,31 +146,3 @@ class ListTagView(PaginationAPIView):
         serializer = BlogSerializer(queryset, many=True)
         result = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(result)
-
-
-# class Bookmarks(APIView):
-#     permission_classes = [IsAuthenticated]
-#
-#     def post(self, request, pk):
-#         data = {
-#             'user': request.user.id,
-#             'forum': pk,
-#         }
-#         serializer = BookmarksSerializer(data=data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(custom_response(serializer.data, msg_display='Đã thêm bookmarks bài viết từ forum thành công !'),
-#                             status=status.HTTP_201_CREATED)
-#         return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
-#                                         msg_display='Thêm thuất bại'),
-#                         status=status.HTTP_400_BAD_REQUEST)
-#
-#     def delete(self, request, pk):
-#         bookmarks = Bookmarks.objects.filter(user=request.user.id, forum=pk).first()
-#         if bookmarks is not None:
-#             bookmarks.delete()
-#             return Response(custom_response({
-#                 'Xóa bookmarks bài viết thành công'
-#             }, msg_display='Hiển thị thành công'), status=status.HTTP_200_OK)
-#         return Response(custom_response({}, list=False, msg_display='Quá trình đã xảy ra lỗi', response_msg='ERROR', ))
-#

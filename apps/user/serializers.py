@@ -31,7 +31,6 @@ class UpdateInformationSerializer(serializers.ModelSerializer):
         fields = ('id', 'user_name', 'first_name', 'about', 'image')
 
 
-
 class TokenObtainPairSerializer(TokenObtainSerializer):
     @classmethod
     def get_token(cls, user):
@@ -75,13 +74,9 @@ class UserInformationSerializer(serializers.ModelSerializer):
 
     def get_points(self, obj):
         comment_counter = CommentModel.objects.filter(author=obj).count()
-        print(comment_counter)
         post_counter = ForumModel.objects.filter(author=obj).count()
-        print(post_counter)
-
         forum_upvotes = UpvoteModel.objects.filter(forum__author=obj)
         forum_bookmarks = Bookmarks.objects.filter(forum__author=obj)
-        print(forum_bookmarks)
         blog_upvotes = UpvoteModel.objects.filter(blog__author=obj)
         forum_upvote_counter = sum(list(map(lambda upvote: upvote.value, forum_upvotes)))
         forum_bookmarks_couter = sum(list(map(lambda bookmark: bookmark.count, forum_bookmarks)))
