@@ -11,7 +11,8 @@ from api.pagination import CustomPagination, PaginationAPIView
 from api.utils import custom_response
 from apps.blog_it.models import UpvoteModel
 from apps.comment.models import CommentModel
-from apps.comment.serializers import CommentSerializer, ListCommentSerializer, RepCommentSerializer
+from apps.comment.serializers import CommentSerializer, ListCommentSerializer, RepCommentSerializer, \
+    CountReplySerializer
 from apps.forum.serializers import UpvoteForumSerializer
 from profanity import comment_filter
 
@@ -148,3 +149,13 @@ class DownVoteComment(APIView):
                                 status=status.HTTP_201_CREATED)
             return Response({'message': 'err'})
 
+
+class CountReplyPostView(PaginationAPIView):
+    pagination_class = CustomPagination
+
+    def get(self, request, pk):
+        queryset = CommentModel.objects.filter(forum=pk)
+        print(queryset,'Test')
+        serializer = CountReplySerializer(queryset)
+        result = self.paginate_queryset(serializer)
+        return self.get_paginated_response(result)

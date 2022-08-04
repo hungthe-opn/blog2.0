@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from apps.comment.models import CommentModel
 
 
@@ -6,6 +7,12 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentModel
         fields = ['forum', 'icon', 'body', 'active', 'created_at', 'updated_at', 'author', 'reply_of']
+
+
+class CounterCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommentModel
+        fields = ['id', 'forum', 'icon', 'body', 'active', 'created_at', 'updated_at', 'author', 'reply_of']
 
 
 class RepCommentSerializer(serializers.ModelSerializer):
@@ -71,5 +78,24 @@ class ListCommentSerializer(serializers.ModelSerializer):
         for upvote in upvote_list:
             counter += upvote.value
         return counter
+
+
+class CountReplySerializer(serializers.ModelSerializer):
+    reply = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CommentModel
+        fields = ['id', 'author', 'forum', 'created_at', 'updated_at', 'reply_of', 'reply',
+                  'quantity_upvote', 'time_edit',
+        ]
+
+    def get_reply(self, obj):
+        print(obj,'1111111111111111111111111111111111111')
+        counter = obj.filter(reply_of=obj.id).count()
+        print(counter, 'Debug11111111111111111111111111111')
+        return counter
+
+
+
 
 

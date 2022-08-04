@@ -96,24 +96,31 @@ class EditPostView(APIView):
     def patch(self, request, pk):
         queryset = ForumModel.objects.filter(id=pk).first()
         forms = request.data
+
         data = {
             'author': request.user.id,
             'title': forms.get('title'),
             'content': comment_filter(forms.get('content')),
             'time_edit': datetime.now(),
-            'description': comment_filter(forms.get('description')),
         }
+
+        tags = forms.get('tags')
         serializer = DetailBlogForumSerializer(queryset, data=data, partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(custom_response(serializer.data, msg_display='Chỉnh sửa bài viết thành công!'),
+            blog = serializer.save()
+            for tag in tags:
+                tag_object = BlogTagModel.objects.filter(id=tag.get('id')).first()
+                print(tag_object.id)
+                if tag_object is not None:
+                    blog.tag.add(tag_object)
+            return Response(custom_response(serializer.data, msg_display='Chỉnh sửa bài viết thành công!!!'),
                             status=status.HTTP_201_CREATED)
         return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
                                         msg_display='Chỉnh sửa thuất bại. Vui lòng kiểm tra lại!'),
                         status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        queryset = ForumModel.objects.filter(id=pk)
+        queryset = ForumModel.objects.filter(id=pk, author=request.user.id)
         serializer = DetailBlogForumSerializer(queryset, many=True)
         queryset.delete()
         return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
@@ -209,7 +216,7 @@ class ListForumFollowersView(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request):
-        followings = Follow.objects.filter(from_user=request.user.id)
+        followings = Follow.objects.filter(from_user=request.user.id, stt=3)
         followings_id = list(map(lambda x: x.to_user, followings))
         queryset = ForumModel.objects.filter(author_id__in=followings_id)
         serializer = ListBlogForumSerializer(queryset, many=True)

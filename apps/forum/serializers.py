@@ -74,7 +74,6 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
     points = serializers.SerializerMethodField()
     reputation = serializers.SerializerMethodField()
     follower_counter = serializers.SerializerMethodField()
-    count_reply = serializers.SerializerMethodField()
 
     class Meta:
         model = ForumModel
@@ -82,7 +81,7 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
                   'slug',
                   'image', 'view_count', 'time_edit', 'description', 'featured',
                   'author_email', 'upvote', 'quantity_comments', 'points',
-                  'reputation', 'follower_counter', 'count_reply',
+                  'reputation', 'follower_counter',
                   'avatar_author', 'created_at', 'time_edit']
 
     def get_author_id(self, obj):
@@ -140,9 +139,6 @@ class DetailBlogForumSerializer(serializers.ModelSerializer):
         forum_upvotes = UpvoteModel.objects.filter(forum__author=obj.author_id)
         forum_upvote_counter = sum(list(map(lambda upvote: upvote.value, forum_upvotes)))
         return followers_counter * 2 + forum_upvote_counter * 1
-
-    def get_count_reply(self, obj):
-        forum_upvote = CommentModel.objects.filter(reply_of=obj)
 
 
 class UpvoteForumSerializer(serializers.ModelSerializer):
