@@ -15,10 +15,7 @@ class BlogSerializer(serializers.ModelSerializer):
     rank = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     avatar_author = serializers.SerializerMethodField()
-    # tag_name = serializers.SerializerMethodField()
     author_email = serializers.SerializerMethodField()
-
-    # upvote = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogModel

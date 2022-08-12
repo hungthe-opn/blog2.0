@@ -1,6 +1,7 @@
+import os
 from celery import Celery
 
-
-app = Celery("stockcnn")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_celery.settings")
+app = Celery("config")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()

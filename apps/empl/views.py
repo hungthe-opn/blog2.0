@@ -14,7 +14,7 @@ from apps.empl.serializers import AddBlogSerializer, UserRoleSerializer, DeleteB
 from apps.user.models import CreateUserModel
 
 
-class AddBlogView(APIView):
+class AddBlog(APIView):
     permission_classes = [IsAdmin | IsAuthor]
 
     def post(self, request, *args, **kwargs):
@@ -46,7 +46,7 @@ class AddBlogView(APIView):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-class UpdateBlogView(APIView):
+class UpdateBlog(APIView):
     permission_classes = [IsAdmin | IsAuthor]
 
     def patch(self, request, pk):
@@ -77,7 +77,7 @@ class UpdateBlogView(APIView):
         return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
 
 
-class UserRoleView(APIView):
+class UserRole(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
@@ -87,17 +87,17 @@ class UserRoleView(APIView):
                         status=status.HTTP_201_CREATED)
 
 
-class DeleteExportManageView(APIView):
+class DeleteExport(APIView):
     permission_classes = [IsAdmin | IsAuthor]
 
     def delete(self, request, pk):
         queryset = BlogModel.objects.filter(id=pk)
         serializer = DeleteBlogSerializer(queryset)
         queryset.delete()
-        return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết h công'))
+        return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
 
 
-class UpdateInsuranceView(APIView):
+class UpdateInsurance(APIView):
     permission_classes = [IsAdmin | IsAuthor]
 
     def patch(self, request, pk, *args, **kwargs):

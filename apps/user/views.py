@@ -1,4 +1,3 @@
-# from django.shortcuts import render
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -35,7 +34,7 @@ class CustomUserCreate(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class UpdateInformationView(APIView):
+class UpdateInformation(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -70,7 +69,7 @@ class UpdateInformationView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class BlacklistTokenView(APIView):
+class BlacklistToken(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -83,7 +82,7 @@ class BlacklistTokenView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserInforView(APIView):
+class UserInfor(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -95,7 +94,7 @@ class UserInforView(APIView):
                         status=status.HTTP_201_CREATED)
 
 
-class UserDetailsView(APIView):
+class UserDetail(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request,pk):
@@ -109,7 +108,7 @@ class UserDetailsView(APIView):
                         status=status.HTTP_201_CREATED)
 
 
-class UserFollowerView(APIView):
+class UserFollower(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -136,7 +135,7 @@ class UserFollowerView(APIView):
         return Response(custom_response({}, list=False, msg_display='Quá trình đã xảy ra lỗi',response_msg='ERROR',))
 
 
-class UserFollow(APIView):
+class UserFollows(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -146,7 +145,7 @@ class UserFollow(APIView):
             'followers': followers.count(),
             'following': followings.count(),
         }, msg_display='Hiển thị thành công'),
-            status=status.HTTP_201_CREATED)
+            status=status.HTTP_200_OK)
 
 
 class InfoFollow(APIView):
@@ -155,12 +154,8 @@ class InfoFollow(APIView):
     def get(self, request,pk):
         followers = request.user.followers.all()
         followings = request.user.followings.all()
-        # follower_serializer = ViewUserSerializer(followers, many=True)
-        # following_serializer = ViewUserSerializer(followings, many=True)
         return Response(custom_response({
-            # 'followers': follower_serializer.data,
-            # 'followings': following_serializer.data
             'followers': followers.count(),
             'following': followings.count(),
         }, msg_display='Hiển thị thành công'),
-            status=status.HTTP_201_CREATED)
+            status=status.HTTP_200_OK)

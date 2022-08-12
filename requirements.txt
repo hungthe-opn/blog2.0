@@ -82,3 +82,6 @@ zope.interface==5.4.0
 mysqlclient==2.1.0
 # psycopg2
 djangorestframework-simplejwt
+django-redis
+django-celery-results==2.2.0
+sqlalchemy

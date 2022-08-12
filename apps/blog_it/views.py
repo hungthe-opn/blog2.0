@@ -1,22 +1,17 @@
-from django.shortcuts import render
-from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.views import APIView
-from api.pagination import CustomPagination, PaginationAPIView
-from api.utils import convert_date_front_to_back, custom_response
-from datetime import date, timedelta
-from django.db.models import Q
-from rest_framework import status, generics,filters
+from rest_framework import status, generics, filters
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from api.permissions import IsAdmin, IsReport
+from rest_framework.views import APIView
 
+from api.pagination import CustomPagination, PaginationAPIView
+from api.utils import custom_response
 # Create your views here.
 from apps.blog_it.models import BlogModel, UpvoteModel, BlogTagModel
-from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, UpvoteSerializer, TagSerializer, \
-    BookmarksSerializer
+from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, UpvoteSerializer, TagSerializer
 
 
-class BlogView(PaginationAPIView):
+class Blog(PaginationAPIView):
     pagination_class = CustomPagination
     lookup_field = 'slug'
 
@@ -37,7 +32,7 @@ class TagBlog(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
-class BlogDetailView(APIView):
+class BlogDetail(APIView):
 
     def get(self, request, slug):
         queryset = BlogModel.objects.get(slug=slug)
@@ -45,7 +40,7 @@ class BlogDetailView(APIView):
         return Response(custom_response(serializer.data, msg_display='Hiển thị bài viết thành công!'), status=status.HTTP_200_OK)
 
 
-class PostListDetailFilter(generics.ListAPIView):
+class SearchBlogs(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = BlogModel.objects.all()
     serializer_class = BlogSerializer
@@ -54,7 +49,7 @@ class PostListDetailFilter(generics.ListAPIView):
     search_fields = ['^slug']
 
 
-class ListFeaturedView(APIView):
+class BlogFeatured(APIView):
 
     def get(self, request):
         queryset = BlogModel.objects.filter(featured=True).order_by('-time_post')
@@ -62,7 +57,7 @@ class ListFeaturedView(APIView):
         return Response(custom_response(serializer.data, msg_display='Hiển thị thành công!'), status=status.HTTP_200_OK)
 
 
-class UpvoteView(APIView):
+class UpvoteBlog(APIView):
     def post(self, request, pk):
         existing_upvote = UpvoteModel.objects.filter(author_id=request.user.id, blog_id=pk).first()
         if existing_upvote is not None:
@@ -83,10 +78,10 @@ class UpvoteView(APIView):
                 serializer.save()
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
-            return Response({'message': 'err'})
+            return Response({'message': 'Lỗi trong quá trình Upvote'})
 
 
-class DownvoteView(APIView):
+class DownVoteBlog(APIView):
     def post(self, request, pk):
         existing_upvote = UpvoteModel.objects.filter(author_id=request.user.id, blog_id=pk).first()
         if existing_upvote is not None:
@@ -107,10 +102,10 @@ class DownvoteView(APIView):
                 serializer.save()
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
-            return Response({'message': 'err'})
+            return Response({'message': 'Lỗi trong quá trình Downvote'})
 
 
-class CountBlogView(APIView):
+class CountBlog(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

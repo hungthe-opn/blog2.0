@@ -1,5 +1,3 @@
-from datetime import date, timedelta
-from .models import *
 from rest_framework import serializers
 
 from ..blog_it.models import BlogModel

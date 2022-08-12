@@ -1,13 +1,11 @@
-from rest_framework.response import Response
-from datetime import date
 from datetime import datetime
 
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from api.pagination import CustomPagination, PaginationAPIView
 
+from api.pagination import CustomPagination, PaginationAPIView
 from api.utils import custom_response
 from apps.blog_it.models import UpvoteModel
 from apps.comment.models import CommentModel
@@ -17,7 +15,7 @@ from apps.forum.serializers import UpvoteForumSerializer
 from profanity import comment_filter
 
 
-class CommentBlogView(PaginationAPIView):
+class CommentBlog(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request, pk):
@@ -74,7 +72,7 @@ class CommentBlogView(PaginationAPIView):
         return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
 
 
-class RepCommentView(APIView):
+class RepComment(APIView):
 
     def post(self, request, pk):
         comment = CommentModel.objects.filter(id=pk, reply_of=None).first()
@@ -86,7 +84,7 @@ class RepCommentView(APIView):
             'body': comment_filter(forms.get('body')),
             'reply_of': forms.get('reply_of')
         }
-        serializer = RepCommentSerializer(comment,data=data)
+        serializer = RepCommentSerializer(comment, data=data)
         if serializer.is_valid():
             serializer.save()
 
@@ -121,7 +119,7 @@ class UpVoteComment(APIView):
                 serializer.save()
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
-            return Response({'message': 'err'})
+            return Response({'message': 'Upvote error'})
 
 
 class DownVoteComment(APIView):
@@ -133,9 +131,9 @@ class DownVoteComment(APIView):
             if existing_upvote.value == 1:
                 existing_upvote.value = -1
                 existing_upvote.save()
-                return Response({'message': 'upvote to downvote'})
+                return Response({'message': 'UpVote to DownVote'})
             else:
-                return Response({'message': 'downvoted before'})
+                return Response({'message': 'DownVote before'})
         else:
             data = {
                 "author": request.user.id,
@@ -147,15 +145,14 @@ class DownVoteComment(APIView):
                 serializer.save()
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
-            return Response({'message': 'err'})
+            return Response({'message': 'DownVote error'})
 
 
-class CountReplyPostView(PaginationAPIView):
+class CountReplyPost(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request, pk):
         queryset = CommentModel.objects.filter(forum=pk)
-        print(queryset,'Test')
         serializer = CountReplySerializer(queryset)
         result = self.paginate_queryset(serializer)
         return self.get_paginated_response(result)

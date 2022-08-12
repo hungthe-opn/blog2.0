@@ -29,21 +29,43 @@ services:
     ports:
       - 3307:3307
     command: ['mysqld', '--character-set-server=utf8', '--collation-server=utf8_unicode_ci']
+
+#  celery:
+#    build: .
+#    container_name: celery
+#    command: celery -A app worker -l info
+#    volumes:
+#      - .:/code
+#    depends_on:
+#      - web
+#      - redis-server
+#      - db
+
   web:
     build: .
     volumes:
       - .:/code
     ports:
       - 8001:8001
-    environment:
-      - DATABASE_NAME=blogs
-      - DATABASE_USER=root
-      - DATABASE_PASSWORD=root
-      - DATABASE_HOST=db
-      - DATABASE_PORT=3307
+    env_file:
+      - ./.env.dev
     depends_on:
       - db
+      - redis-server
+
     command: python manage.py runserver 0.0.0.0:8001
+  celery:
+    build: .
+    container_name: celery
+    command: celery -A celery worker --loglevel=info
+    volumes:
+       - .:/code
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+      - redis-server
+      - web
 networks:
   default:
     external:

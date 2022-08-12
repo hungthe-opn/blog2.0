@@ -9,7 +9,7 @@ from apps.categorys.models import CategoryModel
 from apps.categorys.serializers import CategorySerializer, CategoryBlogsSerializer
 
 
-class CategoryView(PaginationAPIView):
+class Category(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request):
@@ -19,7 +19,7 @@ class CategoryView(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
-class CategoryDetailView(PaginationAPIView):
+class CategoryDetail(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request, pk):

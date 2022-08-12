@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "apps.categorys",
     "apps.empl",
     'rest_framework_simplejwt.token_blacklist',
+    "django_redis",
+    "django_celery_results",
 
 ]
 
@@ -83,7 +85,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
+REDIS_HOST = os.getenv("REDIS_HOST", "redis-server")
 REDIS_PORT = os.getenv("REDIS_PORT", "6379")
 REDIS_USERNAME = os.getenv("REDIS_USER", "")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
@@ -93,8 +95,26 @@ REDIS_URL = os.getenv(
     "REDIS_URL",
     f"{REDIS_PROTOCOL}://{REDIS_USERNAME}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0",
 )
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
-CELERY_BROKER_URL = REDIS_URL
+CACHE_TTL = 60 * 1
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", REDIS_URL)
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+
+
 CELERY_TASK_ROUTES = {
 }
 CELERY_SOFT_TIME_LIMIT = 60 * 5

@@ -90,9 +90,7 @@ class CountReplySerializer(serializers.ModelSerializer):
         ]
 
     def get_reply(self, obj):
-        print(obj,'1111111111111111111111111111111111111')
         counter = obj.filter(reply_of=obj.id).count()
-        print(counter, 'Debug11111111111111111111111111111')
         return counter
 
 

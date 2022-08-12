@@ -1,14 +1,16 @@
 from datetime import datetime
+from django.utils.decorators import method_decorator
 
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from profanity import comment_filter
+from django.views.decorators.cache import cache_page
 
 from api.pagination import CustomPagination, PaginationAPIView
-from api.permissions import IsAdmin
 from api.utils import custom_response
+from config.settings.base import CACHE_TTL
+from profanity import comment_filter
 # Create your views here.
 from .models import ForumModel
 from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, DetailBlogForumSerializer, \
@@ -48,9 +50,10 @@ class AddBlogForum(APIView):
 
 
 # list blog in status = 2, admin check =3
-class PostView(PaginationAPIView):
+class Posts(PaginationAPIView):
     pagination_class = CustomPagination
 
+    @method_decorator(cache_page(CACHE_TTL))
     def get(self, request):
         queryset = ForumModel.objects.filter(stt=3).order_by('-time_edit')
         serializer = ListBlogForumSerializer(queryset, many=True)
@@ -58,7 +61,7 @@ class PostView(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
-class ListBlogViewCount(PaginationAPIView):
+class ViewCount(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request):
@@ -68,7 +71,7 @@ class ListBlogViewCount(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
-class DetailForumView(PaginationAPIView):
+class DetailForum(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request, pk):
@@ -90,29 +93,28 @@ class DetailForumView(PaginationAPIView):
         return Response(custom_response(response), status=status.HTTP_200_OK)
 
 
-class EditPostView(APIView):
-    permission_classes = [IsAuthenticated | IsAdmin]
+class EditPost(APIView):
+    permission_classes = [IsAuthenticated]
 
     def patch(self, request, pk):
-        queryset = ForumModel.objects.filter(id=pk).first()
+        queryset = ForumModel.objects.filter(id=pk, author=request.user.id).first()
         forms = request.data
-
         data = {
             'author': request.user.id,
             'title': forms.get('title'),
             'content': comment_filter(forms.get('content')),
             'time_edit': datetime.now(),
         }
-
         tags = forms.get('tags')
         serializer = DetailBlogForumSerializer(queryset, data=data, partial=True)
         if serializer.is_valid():
             blog = serializer.save()
             for tag in tags:
                 tag_object = BlogTagModel.objects.filter(id=tag.get('id')).first()
-                print(tag_object.id)
+                print(type(tag_object))
                 if tag_object is not None:
-                    blog.tag.add(tag_object)
+                    blog.tag.add(tag_object.id)
+                    tag_object.save()
             return Response(custom_response(serializer.data, msg_display='Chỉnh sửa bài viết thành công!!!'),
                             status=status.HTTP_201_CREATED)
         return Response(custom_response(serializer.errors, response_code=400, response_msg='ERROR',
@@ -126,7 +128,7 @@ class EditPostView(APIView):
         return Response(custom_response(serializer.data, list=False, msg_display='Xóa bài viết thành công'))
 
 
-class ListBlogUserView(PaginationAPIView):
+class ListBlogUser(PaginationAPIView):
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated]
 
@@ -148,7 +150,7 @@ class InforUser(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
-class UpvoteView(APIView):
+class Upvote(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -171,7 +173,7 @@ class UpvoteView(APIView):
                 serializer.save()
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
-            return Response({'message': 'err'})
+            return Response({'message': 'UpVote Error'})
 
     def delete(self, request, pk):
         delete_upvote = UpvoteModel.objects.filter(forum_id=pk, author_id=request.user.id)
@@ -180,7 +182,7 @@ class UpvoteView(APIView):
         return Response(custom_response(serializer.data, list=False, msg_display='Hủy Upvote thành công'))
 
 
-class DownvoteView(APIView):
+class DownVote(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -203,7 +205,7 @@ class DownvoteView(APIView):
                 serializer.save()
                 return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
                                 status=status.HTTP_201_CREATED)
-            return Response({'message': 'err'})
+            return Response({'message': 'DownVote Error'})
 
     def delete(self, request, pk):
         delete_upvote = UpvoteModel.objects.filter(forum_id=pk, author_id=request.user.id)
@@ -212,7 +214,7 @@ class DownvoteView(APIView):
         return Response(custom_response(serializer.data, list=False, msg_display='Hủy Downvote thành công'))
 
 
-class ListForumFollowersView(PaginationAPIView):
+class ListForumFollowers(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request):
@@ -224,7 +226,7 @@ class ListForumFollowersView(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
-class ListBookmarksPostView(PaginationAPIView):
+class ListBookmarksPosts(PaginationAPIView):
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated]
 
@@ -236,7 +238,7 @@ class ListBookmarksPostView(PaginationAPIView):
         return self.get_paginated_response(result)
 
 
-class BookmarksPostView(APIView):
+class BookmarksPosts(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
