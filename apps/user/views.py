@@ -87,9 +87,7 @@ class UserInfor(APIView):
 
     def get(self, request):
         queryset = CreateUserModel.objects.filter(id=request.user.id).first()
-        print(queryset)
         serializer = UserInformationSerializer(queryset)
-        print(serializer.data)
         return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
                         status=status.HTTP_201_CREATED)
 

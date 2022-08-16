@@ -5,6 +5,7 @@ from urllib.parse import urlparse, urljoin
 
 from corsheaders.defaults import default_headers
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -61,6 +62,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "api.middlewares.MiddlewareRole",
+
 ]
 
 ROOT_URLCONF = "config.urls"
