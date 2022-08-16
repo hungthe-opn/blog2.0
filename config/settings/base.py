@@ -43,10 +43,9 @@ INSTALLED_APPS = [
     "apps.user",
     "apps.categorys",
     "apps.empl",
+    "apps.technical",
     'rest_framework_simplejwt.token_blacklist',
     "django_redis",
-    "django_celery_results",
-
 ]
 
 ADDITIONAL_APPS = os.getenv("ADDITIONAL_APPS", None)
