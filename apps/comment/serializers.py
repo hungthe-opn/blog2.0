@@ -81,6 +81,7 @@ class ListCommentSerializer(serializers.ModelSerializer):
 
 
 class CountReplySerializer(serializers.ModelSerializer):
+
     reply = serializers.SerializerMethodField()
 
     class Meta:
@@ -90,6 +91,7 @@ class CountReplySerializer(serializers.ModelSerializer):
         ]
 
     def get_reply(self, obj):
+        print(obj, 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa')
         counter = obj.filter(reply_of=obj.id).count()
         return counter
 

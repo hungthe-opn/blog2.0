@@ -13,7 +13,7 @@ from apps.blog_it.serializers import BlogSerializer, BlogDetailSerializer, Upvot
 
 class Blog(PaginationAPIView):
     pagination_class = CustomPagination
-    lookup_field = 'slug'
+    # lookup_field = 'slug'
 
     def get(self, request):
         queryset = BlogModel.objects.all().order_by('-time_post')

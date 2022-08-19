@@ -152,7 +152,8 @@ class CountReplyPost(PaginationAPIView):
     pagination_class = CustomPagination
 
     def get(self, request, pk):
-        queryset = CommentModel.objects.filter(forum=pk)
+        queryset = CommentModel.objects.filter(forum=pk, reply_of=None)
+        print(queryset, 'Check Data')
         serializer = CountReplySerializer(queryset)
         result = self.paginate_queryset(serializer)
         return self.get_paginated_response(result)

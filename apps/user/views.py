@@ -15,14 +15,14 @@ class CustomUserCreate(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-
         email = request.data['email']
         user_name = request.data['user_name']
         try:
             user = CreateUserModel.objects.get(email=email)
             user_name = CreateUserModel.objects.get(user_name=user_name)
-
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(custom_response(res=True, response_code=400, response_msg='ERROR',
+                                            msg_display='Vui lòng kiểm tra lại tài khoản vui lòng thử lại'),
+                            status=status.HTTP_400_BAD_REQUEST)
         except CreateUserModel.DoesNotExist:
             reg_serializer = RegisterUserSerializer(data=request.data)
             if reg_serializer.is_valid():
@@ -40,11 +40,10 @@ class UpdateInformation(APIView):
     def get(self, request):
         queryset = CreateUserModel.objects.filter(id=request.user.id).first()
         serializer = UpdateInformationSerializer(queryset)
-        return Response(custom_response(serializer.data, msg_display='Hiển thị thành công'),
-                        status=status.HTTP_200_OK)
+        return Response(custom_response(serializer.data, msg_display='Cập nhật tài khoản thành công!'),
+                        status=status.HTTP_201_CREATED)
 
     def patch(self, request):
-        print(request.data.get('user_name'))
         forms = request.data
         data = {
             'id': request.user.id,
@@ -149,7 +148,7 @@ class UserFollows(APIView):
 class InfoFollow(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request,pk):
+    def get(self, request, pk):
         followers = request.user.followers.all()
         followings = request.user.followings.all()
         return Response(custom_response({

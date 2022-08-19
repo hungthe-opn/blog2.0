@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   redis-server:
-    image: redis:6.2-alpine
+    image: "redis:${REDIS_VERSION}"
     restart: always
     volumes:
       - ./redis-server:/data/redis
@@ -13,14 +13,16 @@ services:
     command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
 
   db:
-    image: mysql:5.7.38-oracle
+    env_file:
+      - ./.env
+    image: "mysql:${MYSQL_VERSION}"
     container_name: docker_blogs
     environment:
-      - MYSQL_TCP_PORT=3307
-      - MYSQL_DATABASE=blogs
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_PASSWORD=root
-      - MYSQL_NAME=root
+      - MYSQL_TCP_PORT=${MYSQL_TCP_PORT}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_NAME=${MYSQL_NAME}
     deploy:
       resources:
         limits:
@@ -37,24 +39,27 @@ services:
     ports:
       - 8001:8001
     env_file:
-      - ./.env.dev
+      - ./.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     depends_on:
       - db
       - redis-server
-    command: python manage.py runserver 0.0.0.0:8001
+    command:  python manage.py runserver 0.0.0.0:8001
 
   celery:
-    build: .
+    build:
+       context: .
     container_name: celery
     command: celery -A celery worker --loglevel=info
     volumes:
        - .:/code
     env_file:
-      - ./.env.dev
+      - ./.env
     depends_on:
       - db
       - redis-server
-      - web
+
 networks:
   default:
     external:

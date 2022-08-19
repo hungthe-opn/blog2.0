@@ -8,9 +8,11 @@ create_table_technical_tbl = """
     id bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
     title nvarchar(256) not null unique,
     user_id bigint not null,
+    forum_id bigint not null,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user_createusermodel (id)
+    FOREIGN KEY (forum_id) REFERENCES forum (id)
     ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 """
 
@@ -19,7 +21,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('user', '0001_initial')
+        ('user', '0001_initial'),
+        ('forum', '0001_initial')
     ]
 
     operations = [

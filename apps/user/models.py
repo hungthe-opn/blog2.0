@@ -3,6 +3,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from api import constant
+
 
 # Create your models here.
 
@@ -25,7 +27,7 @@ class CusCustomAccountManager(BaseUserManager):
 
     def create_user(self, email, user_name, first_name, password, **other_fields):
         if not email:
-            raise ValueError(_('Need Email Oke?'))
+            raise ValueError(_('Err'))
         email = self.normalize_email(email)
         user = self.model(email=email, user_name=user_name, first_name=first_name, **other_fields)
         user.set_password(password)
@@ -33,30 +35,31 @@ class CusCustomAccountManager(BaseUserManager):
         return user
 
 
-class RankModel(models.TextChoices):
-    Lv1 = 'Thành viên mới'
-    Lv2 = 'Người dùng'
-    Lv3 = 'Tác giả'
-    Lv4 = 'Fan cứng'
-    Lv5 = 'Người có tầm ảnh hưởng'
-    Lv6 = 'Chuyên gia bình luận'
-    Lv7 = 'Quản trị viên'
+# class RankModel(models.TextChoices):
+#     """ Based on User Rank Forum. """
+#     Lv1 = constant.USER_RANK_Lv1
+#     Lv2 = constant.USER_RANK_Lv2
+#     Lv3 = constant.USER_RANK_Lv3
+#     Lv4 = constant.USER_RANK_Lv4
+#     Lv5 = constant.USER_RANK_Lv5
+#     Lv6 = constant.USER_RANK_Lv6
+#     Lv7 = constant.USER_RANK_Lv7
 
 
-class SexModel(models.TextChoices):
-    Male = 'Nam'
-    Female = 'Nữ'
-    Orther = 'Khác'
-    Secret = 'Bí mật'
+# class SexModel(models.TextChoices):
+#     Male = 'Nam'
+#     Female = 'Nữ'
+#     Orther = 'Khác'
+#     Secret = 'Bí mật'
 
 
 class CreateUserModel(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_('email add'), unique=True)
-    user_name = models.CharField(max_length=150, unique=True, null=True, default='Người mới')
+    email = models.EmailField(_('email add'), max_length=254)
+    user_name = models.CharField(max_length=150, null=True, default='Thành viên mới!')
     first_name = models.CharField(max_length=150, blank=True)
     start_date = models.DateTimeField(default=timezone.now)
     about = models.TextField(_('about'), max_length=500, blank=True)
-    rank = models.CharField(max_length=30, choices=RankModel.choices, default=RankModel.Lv1)
+    rank = models.CharField(max_length=30, choices=constant.USER_RANK_OPTION, default=constant.USER_RANK_Lv1)
     image = models.ImageField(_('image'), max_length=100, null=True, blank=True)
     home = models.CharField(max_length=256, null=True)
     is_admin = models.BooleanField(default=False)
@@ -64,14 +67,18 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
     is_report = models.BooleanField(default=False)
-    sex = models.CharField(max_length=30, choices=SexModel.choices, default=SexModel.Male)
+    sex = models.CharField(max_length=30, choices=constant.USER_SEX_OPTION, default=constant.USER_SEX_NEW)
     objects = CusCustomAccountManager()
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['user_name', 'first_name']
 
-    def __str__(self):
-        return self.user_name
+    class Meta:
+        db_table = 'tbl_user'
+        ordering = ['id']
+        unique_together = ('email',)
+
+    def __unicode__(self):
+        return self.email
 
     def save(self, *args, **kwargs):
         super(CreateUserModel, self).save(*args, **kwargs)
@@ -87,6 +94,7 @@ class Follow(models.Model):
 
     class Meta:
         unique_together = ('from_user', 'to_user')
+        db_table = 'tbl_user_follow'
 
     def __str__(self) -> str:
         return f"{self.from_user.user_name} started following {self.to_user.user_name}"

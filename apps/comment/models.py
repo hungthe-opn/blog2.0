@@ -21,4 +21,5 @@ class CommentModel(models.Model):
         return 'Comment by {} on {}'.format(self.author, self.forum)
 
     class Meta:
-        db_table = 'comment'
+        db_table = 'tbl_comment'
+        ordering = ['id']

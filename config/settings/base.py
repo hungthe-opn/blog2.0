@@ -5,7 +5,6 @@ from urllib.parse import urlparse, urljoin
 
 from corsheaders.defaults import default_headers
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -62,7 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "api.middlewares.MiddlewareRole",
+    # "api.middlewares.MiddlewareRole",
 
 ]
 
@@ -110,12 +109,13 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
 CACHE_TTL = 60 * 1
+# CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://127.0.0.1:6379/0")
+# CELERY_RESULT_BACKEND = os.environ.get("CELERY_BACKEND", "redis://127.0.0.1:6379/0")
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", REDIS_URL)
 CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
-
 
 CELERY_TASK_ROUTES = {
 }
@@ -160,11 +160,11 @@ CHANNEL_LAYERS = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "blogs",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "db",
-        "PORT": 3307,
+        "NAME": os.getenv("DATABASE_NAME", "root"),
+        "USER": os.getenv("DATABASE_USER", "root"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD", "root"),
+        "HOST": os.getenv("DATABASE_HOST", "db"),
+        "PORT": os.getenv("DATABASE_PORT", 3307),
     }
 }
 
@@ -220,8 +220,9 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_SCHEMA_CLASS": "api.openapi.AutoSchema",
-    # 'DATETIME_INPUT_FORMATS': '%Y-%m-%d %H:%M:%S',
-    "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S"
+    "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S",
+    'DATE_FORMAT': '%Y-%m-%d',
+    'TIME_FORMAT': '%H:%M:%S',
 }
 
 JWT_AUTH = {
@@ -262,12 +263,13 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'thehungta13216@gmail.com'
-EMAIL_HOST_PASSWORD = 'uteadbbvghootogm'
-EMAIL_USE_TLS = True
+# Email address
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', '')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', '')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '')
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "stockcnn API spec",
@@ -351,7 +353,7 @@ if "INITIAL_TABLE_DATA_LIMIT" in os.environ:
 
 MEDIA_URL_PATH = "/media/"
 MEDIA_URL = os.getenv("MEDIA_URL", urljoin(PUBLIC_BACKEND_URL, MEDIA_URL_PATH))
-MEDIA_ROOT = os.getenv("MEDIA_ROOT", "/stockcnn/media")
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", urljoin(PUBLIC_BACKEND_URL, MEDIA_URL_PATH))
 
 # Indicates the directory where the user files and user thumbnails are stored.
 USER_FILES_DIRECTORY = "user_files"
@@ -420,6 +422,9 @@ WEBHOOKS_MAX_PER_TABLE = 20
 WEBHOOKS_MAX_CALL_LOG_ENTRIES = 10
 WEBHOOKS_REQUEST_TIMEOUT_SECONDS = 5
 
+AUTH_API = os.environ.get('AUTH_API', 'http://172.20.0.1')
+AUTH_USER_MODEL = 'user.CreateUserModel'
+
 # ======== WARNING ========
 # Please read and understand everything at:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#secure-proxy-ssl-header
@@ -431,5 +436,3 @@ WEBHOOKS_REQUEST_TIMEOUT_SECONDS = 5
 # https://stackoverflow.com/questions/62337379/how-to-append-nginx-ip-to-x-forwarded
 # -for-in-kubernetes-nginx-ingress-controller
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-AUTH_API = 'http://172.20.0.1:8081'
-AUTH_USER_MODEL = 'user.CreateUserModel'

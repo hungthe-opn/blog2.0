@@ -48,4 +48,5 @@ class ForumModel(models.Model):
         return self.title
 
     class Meta:
-        db_table = 'forum'
+        db_table = 'tbl_forum'
+        ordering = ['id']

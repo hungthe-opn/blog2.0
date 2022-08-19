@@ -1,4 +1,6 @@
 from django.contrib.auth.models import update_last_login
+from django.db import transaction, DatabaseError
+from requests import Response
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.settings import api_settings
@@ -17,12 +19,19 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        password = validated_data.pop('password', None)
-        instance = self.Meta.model(**validated_data)
-        if password is not None:
-            instance.set_password(password)
-        instance.save()
-        return instance
+        try:
+            password = validated_data.pop('password', None)
+            current_username = validated_data.get('user_name', None)
+            if len(current_username) > 5:
+                instance = self.Meta.model(**validated_data)
+                if password is not None:
+                    instance.set_password(password)
+                instance.save()
+            else:
+                return ''
+            return instance
+        except Exception as e:
+            print('ERR', e)
 
 
 class UpdateInformationSerializer(serializers.ModelSerializer):

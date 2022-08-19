@@ -6,7 +6,7 @@ from django.db import models
 
 class CategoryModel(models.Model):
     name = models.CharField(max_length=250)
-    image = models.ImageField(max_length=100, null=True, blank=True)
+    image = models.ImageField(max_length=1024, null=True, blank=True)
     slug = models.SlugField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -16,4 +16,5 @@ class CategoryModel(models.Model):
         return self.name
 
     class Meta:
-        db_table = 'category'
+        db_table = 'tbl_category'
+        ordering = ['id']

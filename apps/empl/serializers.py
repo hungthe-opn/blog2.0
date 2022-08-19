@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from ..blog_it.models import BlogModel
 from ..user.models import CreateUserModel
 
