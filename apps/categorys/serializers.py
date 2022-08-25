@@ -22,3 +22,4 @@ class CategoryBlogsSerializer(serializers.ModelSerializer):
         return post
 
 
+

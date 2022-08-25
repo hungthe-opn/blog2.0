@@ -1,14 +1,15 @@
-from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import generics, status, exceptions
 
+from api.permissions import IsEmployee
 from api.utils import custom_response
 # Create your views here.
 from .models import CreateUserModel, Follow
 from .serializers import RegisterUserSerializer, UpdateInformationSerializer, UserInformationSerializer, \
-    ViewUserSerializer, FollowingSerializer
+    ViewUserSerializer, FollowingSerializer, UserDetailSerializer, CreateUserSerializer
 
 
 class CustomUserCreate(APIView):
@@ -156,3 +157,23 @@ class InfoFollow(APIView):
             'following': followings.count(),
         }, msg_display='Hiển thị thành công'),
             status=status.HTTP_200_OK)
+
+
+class UserListView(generics.GenericAPIView):
+    serializer_class = UserDetailSerializer
+    permission_classes = [IsEmployee]
+    ordering_fields = ['id', 'user_name', 'first_name', 'about']
+    ordering = ['id']
+
+
+class CreateUserView(generics.GenericAPIView):
+    serializer_class = CreateUserSerializer
+    # permission_classes = [IsEmployee]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(custom_response(serializer.data, msg_display='Tạo tài khoản thành công'),
+                            status=status.HTTP_201_CREATED)
+        raise exceptions.APIException

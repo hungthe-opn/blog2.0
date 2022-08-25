@@ -39,4 +39,13 @@ USER_SEX_OPTION = (
     (USER_SEX_SECRET, USER_SEX_SECRET),
     (USER_SEX_NEW, USER_SEX_NEW),
 )
+DEFAULT_USER_DATA = [
+    'id',
+    'email',
+    'image',
+    'first_name',
+    'about',
+    'user_name',
+    'password'
+]
 

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
 
-  redis-server:
+  redis:
     image: "redis:${REDIS_VERSION}"
     restart: always
     volumes:
@@ -44,7 +44,7 @@ services:
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     depends_on:
       - db
-      - redis-server
+      - redis
     command:  python manage.py runserver 0.0.0.0:8001
 
   celery:
@@ -58,7 +58,7 @@ services:
       - ./.env
     depends_on:
       - db
-      - redis-server
+      - redis
 
 networks:
   default:

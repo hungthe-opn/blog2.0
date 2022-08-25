@@ -4,9 +4,22 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from api import constant
+from apps.blog_it.models import BaseModel
 
 
 # Create your models here.
+
+
+class UserGroupModel(BaseModel):
+    name = models.CharField(blank=True, null=True, max_length=254)
+    queue_id = models.CharField(blank=True, null=True, max_length=254)
+    is_default = models.BooleanField(default=False, null=True, blank=True)
+    caller_phone_number = models.CharField(blank=True, null=True, max_length=32)
+    deleted = models.BooleanField(default=False, null=True, blank=True)
+
+    class Meta:
+        db_table = 'tbl_user_group'
+        ordering = ['id']
 
 
 class CusCustomAccountManager(BaseUserManager):
@@ -35,27 +48,9 @@ class CusCustomAccountManager(BaseUserManager):
         return user
 
 
-# class RankModel(models.TextChoices):
-#     """ Based on User Rank Forum. """
-#     Lv1 = constant.USER_RANK_Lv1
-#     Lv2 = constant.USER_RANK_Lv2
-#     Lv3 = constant.USER_RANK_Lv3
-#     Lv4 = constant.USER_RANK_Lv4
-#     Lv5 = constant.USER_RANK_Lv5
-#     Lv6 = constant.USER_RANK_Lv6
-#     Lv7 = constant.USER_RANK_Lv7
-
-
-# class SexModel(models.TextChoices):
-#     Male = 'Nam'
-#     Female = 'Nữ'
-#     Orther = 'Khác'
-#     Secret = 'Bí mật'
-
-
 class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email add'), max_length=254)
-    user_name = models.CharField(max_length=150, null=True, default='Thành viên mới!')
+    user_name = models.CharField(max_length=150, null=True, default=constant.USER_RANK_Lv1)
     first_name = models.CharField(max_length=150, blank=True)
     start_date = models.DateTimeField(default=timezone.now)
     about = models.TextField(_('about'), max_length=500, blank=True)
@@ -67,7 +62,10 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
     is_report = models.BooleanField(default=False)
+    delete = models.BooleanField(default=False)
+    is_employee = models.BooleanField(blank=False, null=False, default=False)
     sex = models.CharField(max_length=30, choices=constant.USER_SEX_OPTION, default=constant.USER_SEX_NEW)
+    groups = models.ManyToManyField(UserGroupModel, related_name='users', through='UserGroupRelation')
     objects = CusCustomAccountManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['user_name', 'first_name']
@@ -83,6 +81,16 @@ class CreateUserModel(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         super(CreateUserModel, self).save(*args, **kwargs)
         self.name = str(self.rank.encode('unicode_escape'))
+
+
+class UserGroupRelation(models.Model):
+    user = models.ForeignKey(CreateUserModel, on_delete=models.CASCADE)
+    group = models.ForeignKey(UserGroupModel, on_delete=models.CASCADE)
+    date_joined = models.DateField()
+
+    class Meta:
+        db_table = 'tbl_user_group_relationship'
+        unique_together = ['user', 'group']
 
 
 class Follow(models.Model):

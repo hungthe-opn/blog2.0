@@ -5,7 +5,9 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
-
+import models
+from api import errors, constant
+from api.logger import logger_raise_warn_exception
 from .models import CreateUserModel, Follow
 from ..blog_it.models import UpvoteModel, Bookmarks
 from ..comment.models import CommentModel
@@ -17,6 +19,27 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         model = CreateUserModel
         fields = ('email', 'user_name', 'password')
         extra_kwargs = {'password': {'write_only': True}}
+
+    def validate(self, attrs):
+        if len(attrs.keys()) == 0:
+            logger_raise_warn_exception(attrs, errors.RequireValue, detail="ペイロードが空です", code=305)
+
+        email = attrs.get('email')
+        password = attrs.get('password')
+        if email is not None:
+            is_username_existed = CreateUserModel.objects.filter(email=email, delete=False).exists()
+            if is_username_existed:
+                logger_raise_warn_exception(self.initial_data, errors.ExistedValue,
+                                            detail="同じメールアドレスの顧客が既に登録されています", code=306)
+            else:
+                attrs['email'] = email
+
+        if password.isalnum():
+            logger_raise_warn_exception(self.initial_data, errors.FormatErrorValue,
+                                        detail="パスワードには特殊文字が必要です", code=403)
+        else:
+            attrs['password'] = password
+        return attrs
 
     def create(self, validated_data):
         try:
@@ -143,3 +166,59 @@ class ViewUserSerializer(serializers.ModelSerializer):
 
     def get_following_counter(self, obj):
         return obj.followings.count()
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreateUserModel
+        fields = [
+            'id', 'user_name', 'first_name', 'about','groups','delete','is_admin', 'is_author', ''
+        ]
+
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreateUserModel
+        fields = constant.DEFAULT_USER_DATA
+
+    def validate(self, attrs):
+        print('aaaaa')
+        if len(attrs.keys()) == 0:
+            logger_raise_warn_exception(attrs, errors.RequireValue, detail="ペイロードが空です", code=305)
+        email = attrs.get('email')
+        password = attrs.get('password')
+        user_name = attrs.get('user_name')
+        if email is not None:
+            is_email_existed = CreateUserModel.objects.filter(email=email, delete=False).exists()
+            is_username_existed = CreateUserModel.objects.filter(user_name=user_name, delete=False).exists()
+            if is_email_existed:
+                logger_raise_warn_exception(self.initial_data, errors.ExistedValue, detail="同じメールアドレスの顧客が既に登録されています", code=306 )
+            else:
+                attrs['email'] = email
+                if is_username_existed:
+                    logger_raise_warn_exception(self.initial_data, errors.ExistedValue,
+                                                detail="同じメールアドレスの顧客が既に登録されています", code=306)
+                else:
+                    attrs['user_name'] = user_name
+                    print('DEBUG', user_name)
+                    attrs['password'] = password
+        else:
+            logger_raise_warn_exception(self.initial_data, errors.RequireValue, detail="emailは必須項目です。", code=307)
+        return attrs
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            if password.isalnum():
+                logger_raise_warn_exception(self.initial_data, errors.ExistedValue, detail="同じメールアドレスの顧客が既に登録されています", code=306 )
+            else:
+                instance.set_password(password)
+        instance.save()
+        return instance
+
+
+
+
+
