@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.comment",
     "apps.user",
     "apps.categorys",
+    "apps.notify",
     "apps.empl",
     "apps.technical",
     'rest_framework_simplejwt.token_blacklist',
@@ -153,6 +154,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
+ASGI_APPLICATION = "routing.application"  # routing.py will handle the ASGI
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -160,11 +162,11 @@ CHANNEL_LAYERS = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv("DATABASE_NAME", "root"),
+        "NAME": os.getenv("DATABASE_NAME", "blog"),
         "USER": os.getenv("DATABASE_USER", "root"),
         "PASSWORD": os.getenv("DATABASE_PASSWORD", "root"),
         "HOST": os.getenv("DATABASE_HOST", "db"),
-        "PORT": os.getenv("DATABASE_PORT", 3307),
+        "PORT": os.getenv("DATABASE_PORT", 3306),
     }
 }
 

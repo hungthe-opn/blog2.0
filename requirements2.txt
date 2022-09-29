@@ -84,3 +84,4 @@ mysqlclient
 djangorestframework-simplejwt
 django-redis
 django-celery-results
+sqlalchem

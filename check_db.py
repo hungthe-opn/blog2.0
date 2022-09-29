@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser(description='Check if port is open, avoid\
                                  docker-compose race condition')
 parser.add_argument('blogs', required=True)
 parser.add_argument('db', required=True)
-parser.add_argument('3307', required=True)
+parser.add_argument('3306', required=True)
 
 args = parser.parse_args()
 

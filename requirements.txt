@@ -85,3 +85,4 @@ djangorestframework-simplejwt
 django-redis
 django-celery-results==2.2.0
 sqlalchemy
+channels

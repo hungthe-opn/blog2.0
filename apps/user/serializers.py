@@ -183,7 +183,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
         fields = constant.DEFAULT_USER_DATA
 
     def validate(self, attrs):
-        print('aaaaa')
         if len(attrs.keys()) == 0:
             logger_raise_warn_exception(attrs, errors.RequireValue, detail="ペイロードが空です", code=305)
         email = attrs.get('email')
@@ -201,7 +200,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
                                                 detail="同じメールアドレスの顧客が既に登録されています", code=306)
                 else:
                     attrs['user_name'] = user_name
-                    print('DEBUG', user_name)
                     attrs['password'] = password
         else:
             logger_raise_warn_exception(self.initial_data, errors.RequireValue, detail="emailは必須項目です。", code=307)

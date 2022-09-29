@@ -35,6 +35,6 @@ urlpatterns = (
         path("forum/", include('apps.forum.urls', namespace="forum")),
         path("user-blog/", include('apps.user.urls', namespace="user")),
         path("contact/", include('apps.contact.urls', namespace="ct")),
-
+        path("notify/", include('apps.notify.urls', namespace="notify")),
     ]
 )

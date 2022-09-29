@@ -16,7 +16,7 @@ services:
     env_file:
       - ./.env
     image: "mysql:${MYSQL_VERSION}"
-    container_name: docker_blogs
+    container_name: docker_forum
     environment:
       - MYSQL_TCP_PORT=${MYSQL_TCP_PORT}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -37,20 +37,24 @@ services:
     volumes:
       - .:/code
     ports:
-      - 8001:8001
+      - 8000:8000
     env_file:
       - ./.env
     environment:
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+      - DATABASE_NAME=blog
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
+      - DATABASE_HOST=db
+      - DATABASE_PORT=3306
     depends_on:
       - db
       - redis
-    command:  python manage.py runserver 0.0.0.0:8001
+    command:  python manage.py runserver 0.0.0.0:8000
 
   celery:
     build:
        context: .
-    container_name: celery
+    container_name: celery_forum
     command: celery -A celery worker --loglevel=info
     volumes:
        - .:/code
