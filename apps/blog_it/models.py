@@ -22,9 +22,10 @@ class BaseModel(models.Model):
         super(BaseModel, self).save(*args, **kwargs)
 
 
-class BlogTagModel(BaseModel):
+class BlogTagModel(models.Model):
     title = models.CharField(max_length=50)
-
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.title
 
@@ -33,7 +34,7 @@ class BlogTagModel(BaseModel):
         ordering = ['id']
 
 
-class BlogModel(BaseModel):
+class BlogModel(models.Model):
     tag = models.ManyToManyField(BlogTagModel, related_name="blog_tag")
     category = models.ForeignKey(CategoryModel, related_name="category", on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
@@ -49,7 +50,8 @@ class BlogModel(BaseModel):
     time_update = models.DateTimeField(default=datetime.now, blank=True)
     featured = models.BooleanField(default=False)
     time_read = models.CharField(default=5, max_length=30)
-
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True)
     def save(self, *args, **kwargs):
         if not self.id:  # Create
             if not self.slug:  # slug is blank
@@ -109,13 +111,15 @@ class SeriesBlogModel(BaseModel):
         ordering = ['id']
 
 
-class UpvoteModel(BaseModel):
+class UpvoteModel(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='upvote_author')
     blog = models.ForeignKey(BlogModel, on_delete=models.CASCADE, related_name='blog', null=True, blank=True)
     series = models.ForeignKey(SeriesModel, on_delete=models.CASCADE, related_name='upvote_series', null=True, blank=True)
     forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='forum_upvote', null=True, blank=True)
     comment = models.ForeignKey(CommentModel, on_delete=models.CASCADE, related_name='comment_forum',null=True, blank=True)
     value = models.IntegerField(default=1)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         if self.blog is not None:
@@ -130,12 +134,13 @@ class UpvoteModel(BaseModel):
         ordering = ['id']
 
 
-class Bookmarks(BaseModel):
+class Bookmarks(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookmark_user')
     blog = models.ForeignKey(BlogModel, on_delete=models.CASCADE, related_name='bookmark_blog', null=True)
     forum = models.ForeignKey(ForumModel, on_delete=models.CASCADE, related_name='bookmark_forum', null=True)
     count = models.IntegerField(default=0)
-
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         if self.blog is not None:
             return 'Bookmarks by {} on {}'.format(self.user, self.blog)

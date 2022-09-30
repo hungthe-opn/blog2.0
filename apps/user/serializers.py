@@ -154,6 +154,7 @@ class UserFollowSerializer(serializers.ModelSerializer):
 class ViewUserSerializer(serializers.ModelSerializer):
     follower_counter = serializers.SerializerMethodField()
     following_counter = serializers.SerializerMethodField()
+
     # is_following = serializers.SerializerMethodField()
 
     class Meta:
@@ -172,9 +173,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreateUserModel
         fields = [
-            'id', 'user_name', 'first_name', 'about','groups','delete','is_admin', 'is_author', ''
+            'id', 'user_name', 'first_name', 'about', 'groups', 'delete', 'is_admin', 'is_author', ''
         ]
-
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -192,7 +192,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
             is_email_existed = CreateUserModel.objects.filter(email=email, delete=False).exists()
             is_username_existed = CreateUserModel.objects.filter(user_name=user_name, delete=False).exists()
             if is_email_existed:
-                logger_raise_warn_exception(self.initial_data, errors.ExistedValue, detail="同じメールアドレスの顧客が既に登録されています", code=306 )
+                logger_raise_warn_exception(self.initial_data, errors.ExistedValue,
+                                            detail="同じメールアドレスの顧客が既に登録されています", code=306)
             else:
                 attrs['email'] = email
                 if is_username_existed:
@@ -210,13 +211,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
         instance = self.Meta.model(**validated_data)
         if password is not None:
             if password.isalnum():
-                logger_raise_warn_exception(self.initial_data, errors.ExistedValue, detail="同じメールアドレスの顧客が既に登録されています", code=306 )
+                logger_raise_warn_exception(self.initial_data, errors.ExistedValue,
+                                            detail="同じメールアドレスの顧客が既に登録されています", code=306)
             else:
                 instance.set_password(password)
         instance.save()
         return instance
-
-
-
-
-

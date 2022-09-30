@@ -17,6 +17,8 @@ from .serializers import AddBlogForumSerializer, ListBlogForumSerializer, Detail
     UpvoteForumSerializer
 from ..blog_it.models import BlogTagModel, UpvoteModel, Bookmarks
 from ..blog_it.serializers import BookmarksSerializer, UserBookmarksSerializer
+from ..notify.models import NotificationModel
+from ..notify.serializers import ForumNotificationSerializer
 from ..user.models import Follow
 
 
@@ -78,6 +80,16 @@ class DetailForum(PaginationAPIView):
         queryset = ForumModel.objects.filter(id=pk, stt=3).first()
         bookmarks = Bookmarks.objects.filter(user=request.user.id, forum=pk)
         upvote = UpvoteModel.objects.filter(author=request.user, forum=pk).first()
+        un_enable = NotificationModel.objects.filter(to_forum=pk, is_upvote=True)
+        serializer = ForumNotificationSerializer(un_enable, many=True)
+        status_notify_forum = serializer.data
+        if status_notify_forum is not None:
+            for i in range(len(status_notify_forum)):
+                print('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', len(status_notify_forum))
+                a = status_notify_forum[0]['is_comment']
+                print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', a)
+                status_notify_forum.save()
+
         if upvote is not None:
             if upvote.value == 1:
                 is_upvote = 'upvote'
@@ -155,11 +167,24 @@ class Upvote(APIView):
 
     def post(self, request, pk):
         existing_upvote = UpvoteModel.objects.filter(author_id=request.user.id, forum_id=pk).first()
+        notify = {
+            "from_user": request.user.id,
+            "to_forum": pk,
+            "enable": True,
+            "link": f"http://127.0.0.1:8000/api/forum/detail-forum/{pk}",
+            "content": f"{request.user.user_name} đã đánh giá bài viết của bạn",
+            "is_upvote": True,
+        }
         if existing_upvote is not None:
             if existing_upvote.value == -1:
                 existing_upvote.value = 1
                 existing_upvote.save()
-                return Response({'message': 'downvote to upvote'}, status=status.HTTP_200_OK)
+                notifications_upvote_serializer = ForumNotificationSerializer(data=notify)
+                if notifications_upvote_serializer.is_valid():
+                    notifications_upvote_serializer.save()
+                return Response(
+                    custom_response(notifications_upvote_serializer.data, msg_display='Chỉnh sửa thành công'),
+                    status=status.HTTP_201_CREATED)
             else:
                 return Response({'message': 'upvoted before'}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -168,11 +193,17 @@ class Upvote(APIView):
                 "forum": pk,
                 "value": 1
             }
+            # notifications_upvote.save()
+
             serializer = UpvoteForumSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(custom_response(serializer.data, msg_display='Chỉnh sửa thành công'),
-                                status=status.HTTP_201_CREATED)
+                notifications_upvote_serializer = ForumNotificationSerializer(data=notify)
+                if notifications_upvote_serializer.is_valid():
+                    notifications_upvote_serializer.save()
+                return Response(
+                    custom_response(notifications_upvote_serializer.data, msg_display='Chỉnh sửa thành công'),
+                    status=status.HTTP_201_CREATED)
             return Response({'message': 'UpVote Error'})
 
     def delete(self, request, pk):

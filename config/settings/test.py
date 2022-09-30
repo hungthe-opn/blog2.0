@@ -14,4 +14,4 @@ USER_THUMBNAILS = {"tiny": [21, 21]}
 # Make sure that we are not using the `MEDIA_URL` environment variable because that
 # could break the tests. They are expecting it to be 'http://localhost:8000/media/'
 # because that is default value in `base.py`.
-MEDIA_URL = "http://localhost:8001/media/"
+MEDIA_URL = "http://127.0.0.1:8000/media/"
